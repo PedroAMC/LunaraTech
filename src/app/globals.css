@@ -1,26 +1,35 @@
 @import "tailwindcss";
+@config "../../tailwind.config.ts";
 
+/* === Variables de tema (sin theme()) === */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ease-soft: cubic-bezier(.22,.61,.36,1);
+  --brand-400: #60a5fa;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Fondo espacial + tipografía */
+html, body {
+  @apply text-gray-100;
+  background:
+    radial-gradient(1200px 800px at 10% -10%, #0f172a 10%, #0b0f19 60%),
+    radial-gradient(800px 600px at 120% 10%, #0b1223 10%, transparent 60%),
+    #0b0f19;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Links y botones reaccionan con easing "soft" */
+a, button {
+  transition: all .18s var(--ease-soft);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Focus accesible */
+:focus-visible {
+  outline: 2px solid var(--brand-400);
+  outline-offset: 3px;
+  border-radius: .375rem;
 }
+
+/* Tarjetas básicas: borde suave y blur sutil */
+.card { @apply rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm; }
+
+/* Títulos gradiente (para usar como clase utilitaria) */
+.title-grad { @apply bg-gradient-to-r from-brand-300 to-brand-500 bg-clip-text text-transparent; }
