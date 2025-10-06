@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import ThemeProvider from "@/components/theme/ThemeProvider";
 
 const site = {
   name: "LUNARATECH",
@@ -16,6 +17,7 @@ export const metadata: Metadata = {
   keywords: ["tecnología", "accesorios", "periféricos", "setup gamer", "LunaraTech"],
   alternates: { canonical: site.url },
 
+  // Manifest + favicons
   manifest: "/site.webmanifest",
   icons: {
     icon: [
@@ -25,6 +27,7 @@ export const metadata: Metadata = {
     apple: [{ url: "/apple-touch-icon.png" }],
   },
 
+  // Open Graph
   openGraph: {
     type: "website",
     url: site.url,
@@ -34,6 +37,7 @@ export const metadata: Metadata = {
     images: [{ url: "/og-image.png", width: 1200, height: 630, alt: site.name }],
   },
 
+  // Twitter
   twitter: {
     card: "summary_large_image",
     title: site.name,
@@ -46,19 +50,22 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
+  // El color real lo sobreescribe el tema en CSS
   themeColor: "#0b0f19",
-  colorScheme: "dark",
+  colorScheme: "dark light",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" suppressHydrationWarning>
-      <body>
-        <Navbar />
-        {/* padding top para que el contenido no quede debajo del navbar sticky */}
-        <main className="pt-14">{children}</main>
+      {/* Con next-themes usamos la clase en el <html> */}
+      <body className="min-h-dvh antialiased">
+        <ThemeProvider>
+          <Navbar />
+          {/* padding-top para que el contenido no quede bajo el navbar sticky */}
+          <main className="pt-14">{children}</main>
+        </ThemeProvider>
       </body>
     </html>
   );
 }
-

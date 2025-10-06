@@ -1,25 +1,67 @@
 @import "tailwindcss";
 @config "../../tailwind.config.ts";
 
-/* === Variables de tema (sin theme()) === */
+/* =========================================================
+   Tokens de color por tema (light = :root, dark = .dark)
+   =======================================================*/
 :root {
-  --ease-soft: cubic-bezier(.22,.61,.36,1);
+  /* marca / acentos */
+  --brand-300: #93c5fd;
   --brand-400: #60a5fa;
+  --brand-500: #3b82f6;
+
+  /* texto/fondo (tema claro) */
+  --bg-0: #f7fafc;       /* fondo base */
+  --bg-1: #ffffff;       /* superficies */
+  --tx-0: #0b1223;       /* texto principal */
+  --tx-1: #364152;       /* texto secundario */
+
+  --ease-soft: cubic-bezier(.22,.61,.36,1);
 }
 
-/* Fondo espacial + tipografía */
+.dark {
+  /* marca se mantiene */
+  --brand-300: #93c5fd;
+  --brand-400: #60a5fa;
+  --brand-500: #3b82f6;
+
+  /* texto/fondo (tema oscuro) */
+  --bg-0: #0b0f19;
+  --bg-1: rgba(255,255,255,.04);
+  --tx-0: #e5e7eb;
+  --tx-1: #cbd5e1;
+}
+
+/* =========================================================
+   Base: tipografía + fondos gradiente por tema
+   =======================================================*/
 html, body {
-  @apply text-gray-100;
+  color: var(--tx-0);
+  background: var(--bg-0);
+}
+
+/* Fondo “espacial” solo en oscuro; en claro un sutil gradiente */
+.dark body {
   background:
     radial-gradient(1200px 800px at 10% -10%, #0f172a 10%, #0b0f19 60%),
     radial-gradient(800px 600px at 120% 10%, #0b1223 10%, transparent 60%),
     #0b0f19;
 }
 
-/* Links y botones reaccionan con easing "soft" */
-a, button {
-  transition: all .18s var(--ease-soft);
+body:not(.dark *) {
+  background:
+    radial-gradient(1200px 800px at 10% -10%, #eef2ff 10%, #f8fafc 60%),
+    radial-gradient(800px 600px at 120% 10%, #eef2ff 10%, transparent 60%),
+    var(--bg-0);
 }
+
+/* Transición suave al cambiar de tema */
+html, body, .card, a, button {
+  transition: color .18s var(--ease-soft), background-color .18s var(--ease-soft), border-color .18s var(--ease-soft), box-shadow .18s var(--ease-soft);
+}
+
+/* Links y botones reaccionan con easing "soft" */
+a, button { transition: all .18s var(--ease-soft); }
 
 /* Focus accesible */
 :focus-visible {
@@ -28,8 +70,17 @@ a, button {
   border-radius: .375rem;
 }
 
-/* Tarjetas básicas: borde suave y blur sutil */
-.card { @apply rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm; }
+/* Tarjetas básicas */
+.card {
+  @apply rounded-xl border border-white/10 backdrop-blur-sm;
+  background: var(--bg-1);
+}
 
-/* Títulos gradiente (para usar como clase utilitaria) */
-.title-grad { @apply bg-gradient-to-r from-brand-300 to-brand-500 bg-clip-text text-transparent; }
+/* Títulos con gradiente de marca */
+.title-grad {
+  @apply bg-clip-text text-transparent;
+  background-image: linear-gradient(to right, var(--brand-300), var(--brand-500));
+}
+
+/* Utilidades pequeñas */
+::selection { background: var(--brand-400); color: #0b0f19; }
