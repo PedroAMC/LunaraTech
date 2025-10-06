@@ -1,7 +1,10 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  // 👇 asegúrate de cubrir todo src
   content: ["./src/**/*.{ts,tsx}"],
+  // 👇 indispensable para next-themes (agrega/remueve la clase `dark`)
+  darkMode: "class",
   theme: {
     extend: {
       colors: {
@@ -30,3 +33,4 @@ const config: Config = {
 };
 
 export default config;
+

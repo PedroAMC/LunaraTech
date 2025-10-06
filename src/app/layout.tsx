@@ -2,8 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-// Si más adelante activamos dark/light:
-// import ThemeProvider from "@/components/theme/ThemeProvider";
+import ThemeProvider from "@/components/theme/ThemeProvider";
 
 const site = {
   name: "LUNARATECH",
@@ -57,12 +56,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es" suppressHydrationWarning>
       <body className="min-h-screen">
-        {/* <ThemeProvider> */}
+        <ThemeProvider>
           <Navbar />
-          {/* 56px header + 72px footer */}
+          {/* 56px header + 80px aprox. footer */}
           <main className="pt-14 pb-20">{children}</main>
           <Footer />
-        {/* </ThemeProvider> */}
+        </ThemeProvider>
       </body>
     </html>
   );

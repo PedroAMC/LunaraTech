@@ -40,7 +40,7 @@ html, body {
   background: var(--bg-0);
 }
 
-/* Fondo “espacial” solo en oscuro; en claro un sutil gradiente */
+/* Fondo “espacial” solo en oscuro */
 .dark body {
   background:
     radial-gradient(1200px 800px at 10% -10%, #0f172a 10%, #0b0f19 60%),
@@ -48,7 +48,8 @@ html, body {
     #0b0f19;
 }
 
-body:not(.dark *) {
+/* Fondo suave en claro */
+html:not(.dark) body {
   background:
     radial-gradient(1200px 800px at 10% -10%, #eef2ff 10%, #f8fafc 60%),
     radial-gradient(800px 600px at 120% 10%, #eef2ff 10%, transparent 60%),
@@ -57,10 +58,14 @@ body:not(.dark *) {
 
 /* Transición suave al cambiar de tema */
 html, body, .card, a, button {
-  transition: color .18s var(--ease-soft), background-color .18s var(--ease-soft), border-color .18s var(--ease-soft), box-shadow .18s var(--ease-soft);
+  transition:
+    color .18s var(--ease-soft),
+    background-color .18s var(--ease-soft),
+    border-color .18s var(--ease-soft),
+    box-shadow .18s var(--ease-soft);
 }
 
-/* Links y botones reaccionan con easing "soft" */
+/* Links y botones con easing */
 a, button { transition: all .18s var(--ease-soft); }
 
 /* Focus accesible */
@@ -70,9 +75,10 @@ a, button { transition: all .18s var(--ease-soft); }
   border-radius: .375rem;
 }
 
-/* Tarjetas básicas */
+/* Tarjetas básicas adaptables */
 .card {
-  @apply rounded-xl border border-white/10 backdrop-blur-sm;
+  @apply rounded-xl backdrop-blur-sm;
+  border: 1px solid rgba(255,255,255,.10);
   background: var(--bg-1);
 }
 
@@ -82,10 +88,8 @@ a, button { transition: all .18s var(--ease-soft); }
   background-image: linear-gradient(to right, var(--brand-300), var(--brand-500));
 }
 
-/* Utilidades pequeñas */
+/* Utilidades */
 ::selection { background: var(--brand-400); color: #0b0f19; }
 
-/* Ocultar barra horizontal del carrusel (Firefox ya la oculta con scrollbar-width) */
-::-webkit-scrollbar {
-  height: 8px;
-}
+/* Scrollbar horizontal (p/ carruseles) */
+::-webkit-scrollbar { height: 8px; }

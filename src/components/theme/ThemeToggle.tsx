@@ -1,28 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 
 export default function ThemeToggle() {
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  // Evita desajustes de hidratación: solo mostramos el botón en cliente
-  useEffect(() => setMounted(true), []);
-  if (!mounted) return null;
-
   const next = theme === "light" ? "dark" : "light";
-  const label = theme === "light" ? "Cambiar a modo oscuro" : "Cambiar a modo claro";
 
   return (
     <button
-      type="button"
       onClick={() => setTheme(next)}
-      className="rounded px-3 py-1 text-sm border border-white/10 hover:bg-white/5"
-      aria-label={label}
-      title={label}
+      className="rounded px-3 py-1.5 text-sm border border-black/20 bg-black/5 hover:bg-black/10
+                 dark:border-white/15 dark:bg-white/5 dark:hover:bg-white/10"
+      aria-label="Cambiar tema"
+      title="Cambiar tema"
     >
       {theme === "light" ? "🌙 Oscuro" : "🌞 Claro"}
     </button>
   );
 }
+

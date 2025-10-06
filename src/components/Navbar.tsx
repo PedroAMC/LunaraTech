@@ -2,12 +2,11 @@
 
 import Link from "next/link";
 import ThemeToggle from "@/components/theme/ThemeToggle";
-// Si tienes el contador del carrito, descomenta esta línea y úsalo en el link de Carrito
 // import CartBadge from "@/components/CartBadge";
 
 export default function Navbar() {
   return (
-    <header className="sticky top-0 z-30 border-b border-white/10 bg-black/30 backdrop-blur">
+    <header className="sticky top-0 z-30 border-b border-white/10 bg-black/30 backdrop-blur dark:bg-black/30">
       <nav className="mx-auto h-14 max-w-5xl px-4 flex items-center justify-between">
         {/* Logo / Home */}
         <Link href="/" className="font-semibold tracking-wide title-grad">
@@ -20,10 +19,7 @@ export default function Navbar() {
             Productos
           </Link>
 
-          <Link
-            href="/carrito"
-            className="hover:text-brand-400 flex items-center gap-2"
-          >
+          <Link href="/carrito" className="hover:text-brand-400 flex items-center gap-2">
             <span>Carrito</span>
             {/* <CartBadge /> */}
           </Link>

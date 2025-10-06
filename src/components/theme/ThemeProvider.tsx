@@ -1,9 +1,15 @@
 "use client";
-import { ThemeProvider as NextThemesProvider } from "next-themes";
 
-export default function ThemeProvider({ children }: { children: React.ReactNode }) {
+import { ThemeProvider as NextThemesProvider } from "next-themes";
+import type { ReactNode } from "react";
+
+export default function ThemeProvider({ children }: { children: ReactNode }) {
   return (
-    <NextThemesProvider attribute="class" defaultTheme="light" enableSystem={false}>
+    <NextThemesProvider
+      attribute="class"      // <html class="dark"> …
+      defaultTheme="light"   // por defecto claro
+      enableSystem={false}   // sin seguir tema del SO (lo podemos activar luego)
+    >
       {children}
     </NextThemesProvider>
   );
