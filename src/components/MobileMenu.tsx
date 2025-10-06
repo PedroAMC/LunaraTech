@@ -1,63 +1,189 @@
 "use client";
 
-import { useUI } from "@/store/ui";
-import ThemeToggle from "@/components/theme/ThemeToggle";
+import Link from "next/link";
+import { useEffect } from "react";
 
-export default function MobileMenu({ onClose }: { onClose: () => void }) {
-  const { country, lang, setCountry, setLang } = useUI();
+type MenuLink = { label: string; href: string };
+type MenuSection = { label: string; links: MenuLink[] };
+
+type MobileMenuProps = {
+  /** abrir/cerrar el menú */
+  open: boolean;
+  /** cerrar desde fuera (escape, backdrop, botón X) */
+  onClose: () => void;
+  /** país seleccionado (por ahora solo CL) */
+  country?: "CL";
+  /** callback al cambiar país (estructura lista; luego conectamos moneda/idioma real) */
+  onCountryChange?: (country: "CL") => void;
+};
+
+const SECTIONS: MenuSection[] = [
+  {
+    label: "Secciones",
+    links: [
+      { label: "Productos", href: "/productos" },
+      { label: "Carrito", href: "/carrito" },
+      { label: "Ayuda", href: "/#ayuda" },
+    ],
+  },
+  {
+    label: "Cuenta",
+    links: [
+      { label: "Iniciar sesión", href: "/auth/login" },
+      { label: "Crear cuenta", href: "/auth/register" },
+    ],
+  },
+];
+
+/**
+ * Menú móvil tipo “drawer”. No usa `any` y cumple ESLint.
+ * Controlado por props `open` / `onClose`.
+ */
+export default function MobileMenu({
+  open,
+  onClose,
+  country = "CL",
+  onCountryChange,
+}: MobileMenuProps) {
+  // Cerrar con ESC
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (ev: KeyboardEvent) => {
+      if (ev.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  // Evita scroll del body cuando está abierto
+  useEffect(() => {
+    if (!open) return;
+    const { overflow } = document.body.style;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = overflow;
+    };
+  }, [open]);
+
+  // Handler tipado para el select de país (placeholder para el futuro)
+  function handleCountryChange(
+    e: React.ChangeEvent<HTMLSelectElement>
+  ): void {
+    const value = e.target.value as "CL";
+    onCountryChange?.(value);
+  }
 
   return (
-    <aside className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" onClick={onClose}>
+    <>
+      {/* Backdrop */}
       <div
-        className="ml-auto h-full w-[88%] max-w-sm overflow-y-auto border-l border-white/10 bg-[var(--bg-1)] p-4"
-        onClick={(e) => e.stopPropagation()}
+        role="presentation"
+        aria-hidden={!open}
+        onClick={onClose}
+        className={`fixed inset-0 z-40 bg-black/60 transition-opacity ${
+          open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+      />
+
+      {/* Drawer */}
+      <aside
+        className={`fixed left-0 top-0 z-50 h-full w-[84%] max-w-sm bg-[var(--bg-0)] border-r border-white/10 transition-transform duration-300 ${
+          open ? "translate-x-0" : "-translate-x-full"
+        }`}
+        aria-hidden={!open}
+        aria-label="Menú de navegación"
       >
-        <header className="mb-4 flex items-center justify-between">
-          <h3 className="text-sm opacity-70">MENÚ</h3>
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 h-14 border-b border-white/10">
+          <span className="font-semibold">Menú</span>
           <button
-            className="rounded-md border border-white/15 px-2 py-1 text-sm hover:bg-white/5"
+            type="button"
             onClick={onClose}
+            className="rounded-md px-3 py-1.5 hover:bg-white/10"
+            aria-label="Cerrar menú"
           >
             ✕
           </button>
-        </header>
-
-        <div className="space-y-6">
-          <section>
-            <h4 className="mb-2 text-xs opacity-70">PAÍS</h4>
-            <select
-              value={country}
-              onChange={(e) => setCountry(e.target.value as any)}
-              className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2"
-            >
-              <option value="CL">🇨🇱 Chile</option>
-              {/* futuros: AR, PE, MX… */}
-            </select>
-            <p className="mt-2 text-xs opacity-60">
-              La moneda se ajustará según el país seleccionado.
-            </p>
-          </section>
-
-          <section>
-            <h4 className="mb-2 text-xs opacity-70">IDIOMA</h4>
-            <select
-              value={lang}
-              onChange={(e) => setLang(e.target.value as any)}
-              className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2"
-            >
-              <option value="es">Español</option>
-              <option value="en" disabled>
-                English (pronto)
-              </option>
-            </select>
-          </section>
-
-          <section className="flex items-center justify-between">
-            <span>Tema</span>
-            <ThemeToggle />
-          </section>
         </div>
-      </div>
-    </aside>
+
+        {/* Contenido */}
+        <div className="p-4 space-y-6 overflow-y-auto h-[calc(100%-3.5rem)]">
+          {/* País + (futuro) idioma/tema */}
+          <div className="space-y-3">
+            <div className="text-xs uppercase opacity-70">Preferencias</div>
+
+            <label className="block text-sm">
+              <span className="opacity-80">País</span>
+              <select
+                value={country}
+                onChange={handleCountryChange}
+                className="mt-1 w-full rounded-md border bg-transparent px-3 py-2"
+                style={{ borderColor: "var(--surface-border)" }}
+              >
+                {/* Solo Chile por ahora */}
+                <option value="CL">🇨🇱 Chile</option>
+              </select>
+            </label>
+
+            {/* Slots para futuro: idioma y tema (estructura lista) */}
+            <div className="flex gap-2">
+              <button
+                type="button"
+                className="flex-1 rounded-md border px-3 py-2 text-sm hover:bg-white/5"
+                style={{ borderColor: "var(--surface-border)" }}
+                title="Selector de idioma (estructura, conectar más adelante)"
+              >
+                Idioma
+              </button>
+              <button
+                type="button"
+                className="flex-1 rounded-md border px-3 py-2 text-sm hover:bg-white/5"
+                style={{ borderColor: "var(--surface-border)" }}
+                title="Tema claro/oscuro (ya existe toggle en navbar)"
+              >
+                Tema
+              </button>
+            </div>
+          </div>
+
+          {/* Secciones */}
+          {SECTIONS.map((sec) => (
+            <div key={sec.label} className="space-y-2">
+              <div className="text-xs uppercase opacity-70">{sec.label}</div>
+              <ul className="space-y-1">
+                {sec.links.map((l) => (
+                  <li key={l.href}>
+                    <Link
+                      href={l.href}
+                      onClick={onClose}
+                      className="block rounded-md px-3 py-2 hover:bg-white/5"
+                    >
+                      {l.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+
+          {/* Social (placeholder estético) */}
+          <div className="pt-2">
+            <div className="text-xs uppercase opacity-70 mb-2">Redes</div>
+            <div className="flex gap-2">
+              {["Facebook", "Instagram", "TikTok"].map((name) => (
+                <span
+                  key={name}
+                  className="inline-flex items-center justify-center rounded-md border px-3 py-1.5 text-xs opacity-80 hover:opacity-100"
+                  style={{ borderColor: "var(--surface-border)" }}
+                  title={name}
+                >
+                  {name}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </aside>
+    </>
   );
 }

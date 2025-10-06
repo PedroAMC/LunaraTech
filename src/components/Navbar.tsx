@@ -1,3 +1,4 @@
+// src/components/Navbar.tsx
 "use client";
 
 import Link from "next/link";
@@ -60,6 +61,7 @@ export default function Navbar() {
               onClick={() => setAuthOpen(true)}
               className="inline-flex items-center gap-2 rounded-full border border-white/20 px-3 py-1.5 hover:bg-white/5"
               title="Iniciar sesión / Registrarte"
+              type="button"
             >
               <span>👤</span>
               <span className="hidden sm:inline">Iniciar sesión / Registrarte</span>
@@ -72,7 +74,12 @@ export default function Navbar() {
       </header>
 
       {/* Overlays */}
-      {menuOpen && <MobileMenu onClose={() => setMenuOpen(false)} />}
+      <MobileMenu
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        country="CL" // opcional: dejamos Chile fijo por ahora
+        onCountryChange={() => { /* hook para el futuro */ }}
+      />
       <AuthModal />
     </>
   );
