@@ -1,3 +1,4 @@
+// src/app/productos/page.tsx
 import { Suspense } from "react";
 import ProductsClient from "./products-client";
 

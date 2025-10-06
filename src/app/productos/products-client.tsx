@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, Suspense } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { products as DATA, type Product } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
@@ -10,14 +10,6 @@ type Cat = "todos" | "perifericos" | "accesorios" | "almacenamiento";
 type Sort = "featured" | "price-asc" | "price-desc" | "name";
 
 export default function ProductsClient() {
-  return (
-    <Suspense fallback={<div className="mx-auto max-w-6xl p-6">Cargando…</div>}>
-      <ProductsClientContent />
-    </Suspense>
-  );
-}
-
-function ProductsClientContent() {
   const search = useSearchParams();
   const router = useRouter();
 
@@ -27,7 +19,7 @@ function ProductsClientContent() {
   const [cat, setCat] = useState<Cat>(catFromUrl);
   const [sort, setSort] = useState<Sort>(sortFromUrl);
 
-  // Sincroniza la URL solo cuando cambien cat/sort
+  // Mantener URL sincronizada cuando cambian los estados
   useEffect(() => {
     const params = new URLSearchParams();
     if (cat !== "todos") params.set("cat", cat);
@@ -36,30 +28,30 @@ function ProductsClientContent() {
     router.replace(q ? `/productos?${q}` : "/productos");
   }, [cat, sort, router]);
 
-  // Base por categoría (const, no let)
-  const base: Product[] = useMemo(
-    () => (cat === "todos" ? DATA : DATA.filter((p) => p.category === cat)),
-    [cat]
-  );
+  const filtered = useMemo(() => {
+    let arr: Product[] =
+      cat === "todos" ? DATA : DATA.filter((p) => p.category === cat);
 
-  // Ordenamiento sin reasignar variables
-  const filtered: Product[] = useMemo(() => {
     switch (sort) {
       case "price-asc":
-        return [...base].sort((a, b) => a.price - b.price);
+        arr = [...arr].sort((a, b) => a.price - b.price);
+        break;
       case "price-desc":
-        return [...base].sort((a, b) => b.price - a.price);
+        arr = [...arr].sort((a, b) => b.price - a.price);
+        break;
       case "name":
-        return [...base].sort((a, b) => a.name.localeCompare(b.name));
+        arr = [...arr].sort((a, b) => a.name.localeCompare(b.name));
+        break;
       default:
         // Destacados arriba y, a empate, con stock primero
-        return [...base].sort(
+        arr = [...arr].sort(
           (a, b) =>
             Number(Boolean(b.featured)) - Number(Boolean(a.featured)) ||
             Number((b.stock ?? 0) > 0) - Number((a.stock ?? 0) > 0)
         );
     }
-  }, [base, sort]);
+    return arr;
+  }, [cat, sort]);
 
   const featured = useMemo(() => DATA.filter((p) => Boolean(p.featured)), []);
 
