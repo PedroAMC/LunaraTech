@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { products as DATA, type Product } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
@@ -10,6 +10,14 @@ type Cat = "todos" | "perifericos" | "accesorios" | "almacenamiento";
 type Sort = "featured" | "price-asc" | "price-desc" | "name";
 
 export default function ProductsClient() {
+  return (
+    <Suspense fallback={<div className="mx-auto max-w-6xl p-6">Cargando…</div>}>
+      <ProductsClientContent />
+    </Suspense>
+  );
+}
+
+function ProductsClientContent() {
   const search = useSearchParams();
   const router = useRouter();
 
@@ -19,38 +27,41 @@ export default function ProductsClient() {
   const [cat, setCat] = useState<Cat>(catFromUrl);
   const [sort, setSort] = useState<Sort>(sortFromUrl);
 
-  // Sincroniza la URL solo cuando realmente cambia
+  // Sincroniza la URL solo cuando cambien cat/sort
   useEffect(() => {
     const params = new URLSearchParams();
     if (cat !== "todos") params.set("cat", cat);
     if (sort !== "featured") params.set("sort", sort);
-    const next = params.toString() ? `/productos?${params.toString()}` : "/productos";
-    // Evita reemplazar si ya estamos en la misma URL
-    const current = window.location.pathname + window.location.search;
-    if (current !== next) router.replace(next);
+    const q = params.toString();
+    router.replace(q ? `/productos?${q}` : "/productos");
   }, [cat, sort, router]);
 
-  const filtered = useMemo(() => {
-    let arr: Product[] = cat === "todos" ? DATA : DATA.filter(p => p.category === cat);
+  // Base por categoría (const, no let)
+  const base: Product[] = useMemo(
+    () => (cat === "todos" ? DATA : DATA.filter((p) => p.category === cat)),
+    [cat]
+  );
 
+  // Ordenamiento sin reasignar variables
+  const filtered: Product[] = useMemo(() => {
     switch (sort) {
       case "price-asc":
-        return [...arr].sort((a, b) => a.price - b.price);
+        return [...base].sort((a, b) => a.price - b.price);
       case "price-desc":
-        return [...arr].sort((a, b) => b.price - a.price);
+        return [...base].sort((a, b) => b.price - a.price);
       case "name":
-        return [...arr].sort((a, b) => a.name.localeCompare(b.name));
+        return [...base].sort((a, b) => a.name.localeCompare(b.name));
       default:
         // Destacados arriba y, a empate, con stock primero
-        return [...arr].sort(
+        return [...base].sort(
           (a, b) =>
             Number(Boolean(b.featured)) - Number(Boolean(a.featured)) ||
             Number((b.stock ?? 0) > 0) - Number((a.stock ?? 0) > 0)
         );
     }
-  }, [cat, sort]);
+  }, [base, sort]);
 
-  const featured = useMemo(() => DATA.filter(p => Boolean(p.featured)), []);
+  const featured = useMemo(() => DATA.filter((p) => Boolean(p.featured)), []);
 
   return (
     <div className="mx-auto max-w-6xl px-4">
@@ -63,19 +74,21 @@ export default function ProductsClient() {
       {/* Filtros / Orden */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <div className="flex flex-wrap gap-2">
-          {(["todos", "perifericos", "accesorios", "almacenamiento"] as Cat[]).map(c => (
-            <button
-              key={c}
-              onClick={() => setCat(c)}
-              className={`px-3 py-1.5 rounded-md border ${
-                cat === c
-                  ? "bg-brand-600 border-brand-500"
-                  : "border-white/15 bg-white/5 hover:bg-white/10"
-              }`}
-            >
-              {c === "todos" ? "Todos" : c[0].toUpperCase() + c.slice(1)}
-            </button>
-          ))}
+          {(["todos", "perifericos", "accesorios", "almacenamiento"] as Cat[]).map(
+            (c) => (
+              <button
+                key={c}
+                onClick={() => setCat(c)}
+                className={`px-3 py-1.5 rounded-md border ${
+                  cat === c
+                    ? "bg-brand-600 border-brand-500"
+                    : "border-white/15 bg-white/5 hover:bg-white/10"
+                }`}
+              >
+                {c === "todos" ? "Todos" : c[0].toUpperCase() + c.slice(1)}
+              </button>
+            )
+          )}
         </div>
 
         <label className="flex items-center gap-2 text-sm">
@@ -95,7 +108,7 @@ export default function ProductsClient() {
 
       {/* Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pb-4">
-        {filtered.map(p => (
+        {filtered.map((p) => (
           <ProductCard key={p.id} p={p} />
         ))}
       </div>
