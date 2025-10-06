@@ -1,46 +1,52 @@
 @import "tailwindcss";
 @config "../../tailwind.config.ts";
 
-/* =========================================================
-   Tokens de color por tema (light = :root, dark = .dark)
-   =======================================================*/
+/* =================== Tokens por tema =================== */
 :root {
-  /* marca / acentos */
+  /* marca */
   --brand-300: #93c5fd;
   --brand-400: #60a5fa;
   --brand-500: #3b82f6;
 
-  /* texto/fondo (tema claro) */
-  --bg-0: #f7fafc;       /* fondo base */
-  --bg-1: #ffffff;       /* superficies */
-  --tx-0: #0b1223;       /* texto principal */
-  --tx-1: #364152;       /* texto secundario */
+  /* LIGHT */
+  --bg-0: #f3f6fb;              /* base más grisecita */
+  --bg-1: #ffffff;              /* page bg fallback */
+  --tx-0: #0b1223;
+  --tx-1: #364152;
+
+  /* superficies + bordes (más contraste) */
+  --surface: #ffffff;
+  --surface-2: #f3f5f8;
+  --surface-border: rgba(15, 23, 42, 0.12); /* slate-900 @ 12% */
 
   --ease-soft: cubic-bezier(.22,.61,.36,1);
 }
 
 .dark {
-  /* marca se mantiene */
+  /* marca */
   --brand-300: #93c5fd;
   --brand-400: #60a5fa;
   --brand-500: #3b82f6;
 
-  /* texto/fondo (tema oscuro) */
+  /* DARK */
   --bg-0: #0b0f19;
   --bg-1: rgba(255,255,255,.04);
   --tx-0: #e5e7eb;
   --tx-1: #cbd5e1;
+
+  /* superficies + bordes */
+  --surface: rgba(255,255,255,.06);
+  --surface-2: rgba(255,255,255,.04);
+  --surface-border: rgba(255,255,255,.12);
 }
 
-/* =========================================================
-   Base: tipografía + fondos gradiente por tema
-   =======================================================*/
+/* =================== Base =================== */
 html, body {
   color: var(--tx-0);
   background: var(--bg-0);
 }
 
-/* Fondo “espacial” solo en oscuro */
+/* Oscuro con fondo espacial */
 .dark body {
   background:
     radial-gradient(1200px 800px at 10% -10%, #0f172a 10%, #0b0f19 60%),
@@ -48,15 +54,15 @@ html, body {
     #0b0f19;
 }
 
-/* Fondo suave en claro */
+/* Claro con gradiente suave y contraste */
 html:not(.dark) body {
   background:
-    radial-gradient(1200px 800px at 10% -10%, #eef2ff 10%, #f8fafc 60%),
+    radial-gradient(1200px 800px at 10% -10%, #e9eefc 10%, #f3f6fb 60%),
     radial-gradient(800px 600px at 120% 10%, #eef2ff 10%, transparent 60%),
     var(--bg-0);
 }
 
-/* Transición suave al cambiar de tema */
+/* Transiciones de tema */
 html, body, .card, a, button {
   transition:
     color .18s var(--ease-soft),
@@ -65,21 +71,20 @@ html, body, .card, a, button {
     box-shadow .18s var(--ease-soft);
 }
 
-/* Links y botones con easing */
+/* Accesibilidad */
 a, button { transition: all .18s var(--ease-soft); }
 
-/* Focus accesible */
 :focus-visible {
   outline: 2px solid var(--brand-400);
   outline-offset: 3px;
   border-radius: .375rem;
 }
 
-/* Tarjetas básicas adaptables */
+/* Tarjetas con contraste claro/oscuro */
 .card {
   @apply rounded-xl backdrop-blur-sm;
-  border: 1px solid rgba(255,255,255,.10);
-  background: var(--bg-1);
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
 }
 
 /* Títulos con gradiente de marca */
@@ -91,5 +96,5 @@ a, button { transition: all .18s var(--ease-soft); }
 /* Utilidades */
 ::selection { background: var(--brand-400); color: #0b0f19; }
 
-/* Scrollbar horizontal (p/ carruseles) */
+/* Scrollbar horizontal (carruseles) */
 ::-webkit-scrollbar { height: 8px; }

@@ -1,48 +1,48 @@
 "use client";
+
 import Link from "next/link";
 import type { Product } from "@/lib/products";
+import { useCart } from "@/store/cart";
 
 export default function ProductCard({ p }: { p: Product }) {
-  const inStock = p.stock > 0;
-  const low = p.stock > 0 && p.stock <= 5;
+  const add = useCart((s) => s.add);
+
+  const inStock = (p.stock ?? 0) > 0;
 
   return (
-    <div className="card p-4 hover:translate-y-[-2px]">
-      {/* Placeholder de imagen (luego cambiamos por <Image />) */}
-      <div className="aspect-[4/3] w-full rounded-lg bg-white/10 mb-3 grid place-items-center text-white/60 text-sm">
+    <article className="card p-4">
+      {/* Imagen */}
+      <div className="mb-3 aspect-[4/3] w-full rounded-lg border border-white/10 bg-white/[.03] grid place-items-center text-sm text-white/40">
         Imagen
       </div>
 
+      {/* Info */}
       <h3 className="font-medium">{p.name}</h3>
-      <p className="mt-1 text-white/70">${p.price.toLocaleString("es-CL")}</p>
+      <p className="text-sm text-white/70">${p.price.toLocaleString("es-CL")}</p>
 
-      <div className="mt-2 text-sm">
-        {inStock ? (
-          low ? (
-            <span className="text-amber-300">¡Quedan {p.stock}!</span>
-          ) : (
-            <span className="text-emerald-300">En stock</span>
-          )
-        ) : (
-          <span className="text-rose-300">Sin stock</span>
-        )}
-      </div>
+      {inStock ? (
+        <p className="mt-1 text-xs text-emerald-400">En stock</p>
+      ) : (
+        <p className="mt-1 text-xs text-rose-400">Sin stock</p>
+      )}
 
+      {/* Acciones */}
       <div className="mt-3 flex gap-2">
         <button
-          className="rounded-md px-3 py-1.5 bg-brand-600 hover:bg-brand-500 font-medium disabled:opacity-50"
           disabled={!inStock}
-          title={inStock ? "Agregar al carrito" : "Sin stock"}
+          onClick={() => add(p)}
+          className="rounded-lg bg-brand-600 px-3 py-1.5 text-sm text-white hover:bg-brand-500 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Agregar
         </button>
+
         <Link
-          href={`/producto/${p.id}`}
-          className="rounded-md px-3 py-1.5 bg-white/5 hover:bg-white/10"
+          href={`/producto/${p.slug}`}
+          className="rounded-lg border border-white/15 px-3 py-1.5 text-sm hover:bg-white/10"
         >
           Ver detalle
         </Link>
       </div>
-    </div>
+    </article>
   );
 }

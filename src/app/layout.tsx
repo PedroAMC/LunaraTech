@@ -58,7 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen">
         <ThemeProvider>
           <Navbar />
-          {/* 56px header + 80px aprox. footer */}
+          {/* 56px header + ~80px footer */}
           <main className="pt-14 pb-20">{children}</main>
           <Footer />
         </ThemeProvider>
