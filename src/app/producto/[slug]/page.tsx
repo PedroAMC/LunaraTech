@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import { getProductBySlug } from "@/lib/products";
 import AddToCartButton from "@/components/AddToCartButton";
 
@@ -18,11 +19,14 @@ export default function ProductoDetail({ params }: PageProps) {
         <div className="mt-4 flex flex-col md:flex-row gap-6">
           {/* Imagen */}
           <div className="md:w-1/2">
-            <img
+            <Image
               src={product.image}
               alt={product.name}
-              className="w-full rounded-xl border"
+              width={800}
+              height={600}
+              className="w-full h-auto rounded-xl border"
               style={{ borderColor: "var(--surface-border)" }}
+              priority
             />
           </div>
 
@@ -31,7 +35,6 @@ export default function ProductoDetail({ params }: PageProps) {
             <p className="text-lg">
               Precio: ${product.price.toLocaleString("es-CL")}
             </p>
-
             {product.stock > 0 ? (
               <p className="text-green-500">
                 En stock: <strong>{product.stock}</strong>

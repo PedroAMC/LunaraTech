@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { products as DATA, type Product } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
 import CarouselRail from "@/components/CarouselRail";
@@ -8,9 +9,33 @@ import CarouselRail from "@/components/CarouselRail";
 type Cat = "todos" | "perifericos" | "accesorios" | "almacenamiento";
 type Sort = "featured" | "price-asc" | "price-desc" | "name";
 
+/** Wrapper para cumplir con el requisito de Suspense cuando usamos useSearchParams */
 export default function ProductsPage() {
-  const [cat, setCat] = useState<Cat>("todos");
-  const [sort, setSort] = useState<Sort>("featured");
+  return (
+    <Suspense fallback={<div className="mx-auto max-w-6xl p-6">Cargando…</div>}>
+      <ProductsPageContent />
+    </Suspense>
+  );
+}
+
+function ProductsPageContent() {
+  const search = useSearchParams();
+  const router = useRouter();
+
+  const catFromUrl = (search.get("cat") as Cat) ?? "todos";
+  const sortFromUrl = (search.get("sort") as Sort) ?? "featured";
+
+  const [cat, setCat] = useState<Cat>(catFromUrl);
+  const [sort, setSort] = useState<Sort>(sortFromUrl);
+
+  // Mantener URL sincronizada cuando cambian los estados
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (cat !== "todos") params.set("cat", cat);
+    if (sort !== "featured") params.set("sort", sort);
+    const q = params.toString();
+    router.replace(q ? `/productos?${q}` : "/productos");
+  }, [cat, sort, router]);
 
   const filtered = useMemo(() => {
     let arr: Product[] =
@@ -27,7 +52,7 @@ export default function ProductsPage() {
         arr = [...arr].sort((a, b) => a.name.localeCompare(b.name));
         break;
       default:
-        // Destacados arriba y, a empate, stock primero
+        // Destacados arriba y, a empate, con stock primero
         arr = [...arr].sort(
           (a, b) =>
             Number(Boolean(b.featured)) - Number(Boolean(a.featured)) ||
@@ -37,36 +62,34 @@ export default function ProductsPage() {
     return arr;
   }, [cat, sort]);
 
-  const featured = useMemo(
-    () => DATA.filter((p) => Boolean(p.featured)),
-    []
-  );
+  const featured = useMemo(() => DATA.filter((p) => Boolean(p.featured)), []);
 
   return (
     <div className="mx-auto max-w-6xl px-4">
       {/* Carrusel tipo vitrina */}
       <div className="mt-4 mb-8">
+        <h2 className="mb-3 text-lg font-medium opacity-80">Destacados</h2>
         <CarouselRail items={featured} />
       </div>
 
       {/* Filtros / Orden */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <div className="flex flex-wrap gap-2">
-          {(
-            ["todos", "perifericos", "accesorios", "almacenamiento"] as Cat[]
-          ).map((c) => (
-            <button
-              key={c}
-              onClick={() => setCat(c)}
-              className={`px-3 py-1.5 rounded-md border ${
-                cat === c
-                  ? "bg-brand-600 border-brand-500"
-                  : "border-white/15 bg-white/5 hover:bg-white/10"
-              }`}
-            >
-              {c === "todos" ? "Todos" : c[0].toUpperCase() + c.slice(1)}
-            </button>
-          ))}
+          {(["todos", "perifericos", "accesorios", "almacenamiento"] as Cat[]).map(
+            (c) => (
+              <button
+                key={c}
+                onClick={() => setCat(c)}
+                className={`px-3 py-1.5 rounded-md border ${
+                  cat === c
+                    ? "bg-brand-600 border-brand-500"
+                    : "border-white/15 bg-white/5 hover:bg-white/10"
+                }`}
+              >
+                {c === "todos" ? "Todos" : c[0].toUpperCase() + c.slice(1)}
+              </button>
+            )
+          )}
         </div>
 
         <label className="flex items-center gap-2 text-sm">
