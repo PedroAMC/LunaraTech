@@ -13,7 +13,9 @@ export default function ProductsPage() {
   const [sort, setSort] = useState<Sort>("featured");
 
   const filtered = useMemo(() => {
-    let arr: Product[] = cat === "todos" ? DATA : DATA.filter(p => p.category === cat);
+    let arr: Product[] =
+      cat === "todos" ? DATA : DATA.filter((p) => p.category === cat);
+
     switch (sort) {
       case "price-asc":
         arr = [...arr].sort((a, b) => a.price - b.price);
@@ -25,13 +27,20 @@ export default function ProductsPage() {
         arr = [...arr].sort((a, b) => a.name.localeCompare(b.name));
         break;
       default:
-        // "featured": stock primero y destacados arriba
-        arr = [...arr].sort((a, b) => Number(!!b.featured) - Number(!!a.featured) || Number(b.stock > 0) - Number(a.stock > 0));
+        // Destacados arriba y, a empate, stock primero
+        arr = [...arr].sort(
+          (a, b) =>
+            Number(Boolean(b.featured)) - Number(Boolean(a.featured)) ||
+            Number((b.stock ?? 0) > 0) - Number((a.stock ?? 0) > 0)
+        );
     }
     return arr;
   }, [cat, sort]);
 
-  const featured = useMemo(() => DATA.filter(p => p.featured), []);
+  const featured = useMemo(
+    () => DATA.filter((p) => Boolean(p.featured)),
+    []
+  );
 
   return (
     <div className="mx-auto max-w-6xl px-4">
@@ -43,13 +52,19 @@ export default function ProductsPage() {
       {/* Filtros / Orden */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <div className="flex flex-wrap gap-2">
-          {(["todos","perifericos","accesorios","almacenamiento"] as Cat[]).map(c => (
+          {(
+            ["todos", "perifericos", "accesorios", "almacenamiento"] as Cat[]
+          ).map((c) => (
             <button
               key={c}
               onClick={() => setCat(c)}
-              className={`px-3 py-1.5 rounded-md border ${cat===c ? "bg-brand-600 border-brand-500" : "border-white/15 bg-white/5 hover:bg-white/10"}`}
+              className={`px-3 py-1.5 rounded-md border ${
+                cat === c
+                  ? "bg-brand-600 border-brand-500"
+                  : "border-white/15 bg-white/5 hover:bg-white/10"
+              }`}
             >
-              {c === "todos" ? "Todos" : c[0].toUpperCase()+c.slice(1)}
+              {c === "todos" ? "Todos" : c[0].toUpperCase() + c.slice(1)}
             </button>
           ))}
         </div>
@@ -71,7 +86,9 @@ export default function ProductsPage() {
 
       {/* Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pb-4">
-        {filtered.map(p => <ProductCard key={p.id} p={p} />)}
+        {filtered.map((p) => (
+          <ProductCard key={p.id} p={p} />
+        ))}
       </div>
     </div>
   );

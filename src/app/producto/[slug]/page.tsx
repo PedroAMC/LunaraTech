@@ -1,34 +1,50 @@
-"use client";
-import Link from "next/link";
-import { products } from "@/lib/products";
-import { useCart } from "@/store/cart";
+// src/app/producto/[slug]/page.tsx
+import { notFound } from "next/navigation";
+import { getProductBySlug } from "@/lib/products";
 
-type Props = { params: { slug: string } };
+type PageProps = {
+  params: { slug: string };
+};
 
-export default function ProductoDetalle({ params }: Props) {
-  const add = useCart((s) => s.add);
-  const product = products.find((p) => p.slug === params.slug);
-
-  if (!product) {
-    return (
-      <main className="mx-auto max-w-5xl p-6">
-        <Link href="/productos" className="underline">&larr; volver</Link>
-        <h1 className="text-2xl font-semibold mt-4">Producto no encontrado</h1>
-      </main>
-    );
-  }
+export default function ProductoDetail({ params }: PageProps) {
+  const product = getProductBySlug(params.slug);
+  if (!product) return notFound();
 
   return (
     <main className="mx-auto max-w-5xl p-6">
-      <Link href="/productos" className="underline">&larr; volver</Link>
-      <h1 className="text-2xl font-semibold mt-2">{product.name}</h1>
-      <p className="mt-2 opacity-80">Detalle placeholder. Aquí irá la info real.</p>
-      <button
-        className="mt-4 rounded bg-brand-600 px-4 py-2 text-white hover:bg-brand-500 active:translate-y-[1px] shadow-md hover:shadow-soft transition-all ease-soft"
-        onClick={() => add({ id: product.slug, name: product.name, price: product.price, qty: 1 })}
-      >
-        Agregar al carrito (${product.price.toLocaleString("es-CL")})
-      </button>
+      <section className="card p-6 md:p-8">
+        <h1 className="text-2xl md:text-3xl font-semibold title-grad">
+          {product.name}
+        </h1>
+
+        <div className="mt-4 flex flex-col md:flex-row gap-6">
+          {/* Imagen */}
+          <div className="md:w-1/2">
+            <img
+              src={product.image || "/vercel.svg"}
+              alt={product.name}
+              className="w-full rounded-xl border border-white/10"
+            />
+          </div>
+
+          {/* Datos */}
+          <div className="md:w-1/2 space-y-3">
+            <p className="text-lg">
+              Precio: ${product.price.toLocaleString("es-CL")}
+            </p>
+
+            {product.stock > 0 ? (
+              <p className="text-green-400">En stock: {product.stock}</p>
+            ) : (
+              <p className="text-red-400">Sin stock</p>
+            )}
+
+            <button className="mt-4 inline-flex items-center gap-2 rounded-lg px-4 py-2 bg-brand-600 hover:bg-brand-500 active:translate-y-[1px] shadow-md hover:shadow-soft text-white">
+              Agregar al carrito
+            </button>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }
