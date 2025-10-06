@@ -1,25 +1,78 @@
-import Link from "next/link";
-import { products } from "@/lib/products";
+"use client";
 
-export default function ProductosPage() {
+import { useMemo, useState } from "react";
+import { products as DATA, type Product } from "@/lib/products";
+import ProductCard from "@/components/ProductCard";
+import CarouselRail from "@/components/CarouselRail";
+
+type Cat = "todos" | "perifericos" | "accesorios" | "almacenamiento";
+type Sort = "featured" | "price-asc" | "price-desc" | "name";
+
+export default function ProductsPage() {
+  const [cat, setCat] = useState<Cat>("todos");
+  const [sort, setSort] = useState<Sort>("featured");
+
+  const filtered = useMemo(() => {
+    let arr: Product[] = cat === "todos" ? DATA : DATA.filter(p => p.category === cat);
+    switch (sort) {
+      case "price-asc":
+        arr = [...arr].sort((a, b) => a.price - b.price);
+        break;
+      case "price-desc":
+        arr = [...arr].sort((a, b) => b.price - a.price);
+        break;
+      case "name":
+        arr = [...arr].sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      default:
+        // "featured": stock primero y destacados arriba
+        arr = [...arr].sort((a, b) => Number(!!b.featured) - Number(!!a.featured) || Number(b.stock > 0) - Number(a.stock > 0));
+    }
+    return arr;
+  }, [cat, sort]);
+
+  const featured = useMemo(() => DATA.filter(p => p.featured), []);
+
   return (
-    <main className="mx-auto max-w-5xl p-6">
-      <h1 className="text-2xl font-semibold mb-4">Productos</h1>
+    <div className="mx-auto max-w-6xl px-4">
+      {/* Carrusel tipo vitrina */}
+      <div className="mt-4 mb-8">
+        <CarouselRail items={featured} />
+      </div>
 
-      <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {products.map((p) => (
-          <li key={p.slug} className="card p-4">
-            <div className="text-lg font-medium">{p.name}</div>
-            <div className="opacity-70">${p.price.toLocaleString("es-CL")}</div>
-            <Link
-              href={`/producto/${p.slug}`}
-              className="mt-2 inline-block underline"
+      {/* Filtros / Orden */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+        <div className="flex flex-wrap gap-2">
+          {(["todos","perifericos","accesorios","almacenamiento"] as Cat[]).map(c => (
+            <button
+              key={c}
+              onClick={() => setCat(c)}
+              className={`px-3 py-1.5 rounded-md border ${cat===c ? "bg-brand-600 border-brand-500" : "border-white/15 bg-white/5 hover:bg-white/10"}`}
             >
-              Ver detalle
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </main>
+              {c === "todos" ? "Todos" : c[0].toUpperCase()+c.slice(1)}
+            </button>
+          ))}
+        </div>
+
+        <label className="flex items-center gap-2 text-sm">
+          Ordenar:
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as Sort)}
+            className="bg-black/40 border border-white/15 rounded px-2 py-1"
+          >
+            <option value="featured">Destacados</option>
+            <option value="price-asc">Precio (menor a mayor)</option>
+            <option value="price-desc">Precio (mayor a menor)</option>
+            <option value="name">Nombre (A-Z)</option>
+          </select>
+        </label>
+      </div>
+
+      {/* Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pb-4">
+        {filtered.map(p => <ProductCard key={p.id} p={p} />)}
+      </div>
+    </div>
   );
 }

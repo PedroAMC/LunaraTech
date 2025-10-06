@@ -84,3 +84,8 @@ a, button { transition: all .18s var(--ease-soft); }
 
 /* Utilidades pequeñas */
 ::selection { background: var(--brand-400); color: #0b0f19; }
+
+/* Ocultar barra horizontal del carrusel (Firefox ya la oculta con scrollbar-width) */
+::-webkit-scrollbar {
+  height: 8px;
+}
