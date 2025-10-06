@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { Suspense } from "react";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ThemeProvider from "@/components/theme/ThemeProvider";
+import { Suspense } from "react";
 
 const site = {
   name: "LUNARATECH",
@@ -18,6 +18,7 @@ export const metadata: Metadata = {
   description: site.description,
   keywords: ["tecnología", "accesorios", "periféricos", "setup gamer", "LunaraTech"],
   alternates: { canonical: site.url },
+
   manifest: "/site.webmanifest",
   icons: {
     icon: [
@@ -26,6 +27,7 @@ export const metadata: Metadata = {
     ],
     apple: [{ url: "/apple-touch-icon.png" }],
   },
+
   openGraph: {
     type: "website",
     url: site.url,
@@ -34,12 +36,14 @@ export const metadata: Metadata = {
     description: site.description,
     images: [{ url: "/og-image.png", width: 1200, height: 630, alt: site.name }],
   },
+
   twitter: {
     card: "summary_large_image",
     title: site.name,
     description: site.description,
     images: ["/og-image.png"],
   },
+
   robots: { index: true, follow: true },
   other: { "theme-color": "#0b0f19", "msapplication-TileColor": "#0b0f19" },
 };
@@ -54,14 +58,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es" suppressHydrationWarning>
       <body className="min-h-screen">
         <ThemeProvider>
-          <Navbar />
-          {/* 56px header + ~80px footer */}
-          <main className="pt-14 pb-20">
-            {/* ⬇️ Envuelve TODAS las páginas en Suspense */}
-            <Suspense fallback={null}>
-              {children}
-            </Suspense>
-          </main>
+          {/* Protegemos cualquier hook de navegación que use el header */}
+          <Suspense fallback={<div className="h-14" />}>
+            <Navbar />
+          </Suspense>
+
+          {/* 56px header + 80px aprox. footer.
+              Suspense aquí garantiza que CUALQUIER página (incluida /404)
+              que use useSearchParams/usePathname esté dentro de un boundary */}
+          <Suspense fallback={<main className="pt-14 pb-20" />}>
+            <main className="pt-14 pb-20">{children}</main>
+          </Suspense>
+
           <Footer />
         </ThemeProvider>
       </body>
