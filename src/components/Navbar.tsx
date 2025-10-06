@@ -3,10 +3,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import ThemeToggle from "@/components/theme/ThemeToggle";
-import CartBadge from "@/components/CartBadge";
 import { useState } from "react";
 
+import ThemeToggle from "@/components/theme/ThemeToggle";
+import CartBadge from "@/components/CartBadge";
 import SearchBar from "@/components/SearchBar";
 import MobileMenu from "@/components/MobileMenu";
 import AuthModal from "@/components/AuthModal";
@@ -21,11 +21,14 @@ export default function Navbar() {
     <>
       <header className="sticky top-0 z-30 border-b border-white/10 bg-black/30 backdrop-blur">
         <nav className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4">
-          {/* IZQUIERDA: Logo + menú móvil */}
+          {/* IZQUIERDA: Logo + botón menú */}
           <div className="flex items-center gap-3">
             <button
-              className="md:hidden rounded-md border border-white/15 px-2 py-1 hover:bg-white/5"
+              type="button"
+              className="rounded-md border border-white/15 px-2 py-1 hover:bg-white/5"
               aria-label="Abrir menú"
+              aria-controls="mobile-menu"
+              aria-expanded={menuOpen}
               onClick={() => setMenuOpen(true)}
             >
               ☰
@@ -41,7 +44,7 @@ export default function Navbar() {
             <SearchBar />
           </div>
 
-          {/* DERECHA: acciones */}
+          {/* DERECHA: Acciones */}
           <div className="flex items-center gap-4 text-sm">
             <Link
               href="/productos"
@@ -50,18 +53,18 @@ export default function Navbar() {
               Productos
             </Link>
 
-            {/* País fijo visual (Chile) */}
+            {/* País (visual por ahora) */}
             <div className="hidden items-center gap-1 opacity-90 sm:flex">
               <span className="text-xs">🇨🇱</span>
               <span>Chile</span>
             </div>
 
-            {/* Botón unificado Auth */}
+            {/* Auth unificado */}
             <button
+              type="button"
               onClick={() => setAuthOpen(true)}
               className="inline-flex items-center gap-2 rounded-full border border-white/20 px-3 py-1.5 hover:bg-white/5"
               title="Iniciar sesión / Registrarte"
-              type="button"
             >
               <span>👤</span>
               <span className="hidden sm:inline">Iniciar sesión / Registrarte</span>
@@ -77,8 +80,8 @@ export default function Navbar() {
       <MobileMenu
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
-        country="CL" // opcional: dejamos Chile fijo por ahora
-        onCountryChange={() => { /* hook para el futuro */ }}
+        country="CL"                   // fijo por ahora
+        onCountryChange={(_c) => {}}   // firma compatible
       />
       <AuthModal />
     </>

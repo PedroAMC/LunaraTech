@@ -4,59 +4,73 @@ import Link from "next/link";
 import { useCart } from "@/store/cart";
 
 export default function CartPage() {
-  const { items, inc, dec, remove, clear, subtotal } = useCart();
+  const items    = useCart((s) => s.items);
+  const inc      = useCart((s) => s.inc);
+  const dec      = useCart((s) => s.dec);
+  const remove   = useCart((s) => s.remove);
+  const clear    = useCart((s) => s.clear);
+  const count    = useCart((s) => s.count());
+  const subtotal = useCart((s) => s.subtotal());
 
-  if (items.length === 0) {
+  if (!items || items.length === 0) {
     return (
-      <main className="mx-auto max-w-5xl px-4 py-8">
-        <h1 className="text-2xl font-semibold mb-4">Tu carrito</h1>
-        <p className="mb-6 text-white/80">No tienes productos.</p>
-        <Link href="/productos" className="rounded-lg bg-brand-600 px-4 py-2 text-white hover:bg-brand-500">
-          Ir a productos
-        </Link>
+      <main className="mx-auto max-w-5xl p-6">
+        <section className="card p-6 md:p-8 text-center space-y-4">
+          <h1 className="text-2xl md:text-3xl font-semibold title-grad">Tu carrito</h1>
+          <p className="opacity-80">Aún no has agregado productos.</p>
+          <Link
+            href="/productos"
+            className="inline-flex items-center gap-2 rounded-lg px-4 py-2 bg-brand-600 hover:bg-brand-500 active:translate-y-[1px] shadow-md hover:shadow-soft text-white"
+          >
+            Ir a productos
+          </Link>
+        </section>
       </main>
     );
   }
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8 space-y-6">
-      <h1 className="text-2xl font-semibold">Tu carrito</h1>
+    <main className="mx-auto max-w-5xl p-6">
+      <section className="card p-6 md:p-8">
+        <h1 className="text-2xl md:text-3xl font-semibold title-grad">Tu carrito</h1>
 
-      <section className="card p-4">
-        <ul className="divide-y divide-white/10">
-          {items.map(({ product: p, qty }) => (
-            <li key={p.id} className="py-3 grid grid-cols-[1fr_auto_auto_auto_auto] items-center gap-3">
-              <div>
-                <div className="font-medium">{p.name}</div>
-                <div className="text-sm text-white/70">${p.price.toLocaleString("es-CL")}</div>
+        <div className="mt-6 space-y-4">
+          {items.map(({ product, qty }) => (
+            <div key={product.id} className="flex items-center justify-between gap-4 border-b border-white/10 pb-4">
+              <div className="min-w-0">
+                <p className="font-medium truncate">{product.name}</p>
+                <p className="opacity-70 text-sm">${product.price.toLocaleString("es-CL")}</p>
               </div>
 
               <div className="flex items-center gap-2">
-                <button onClick={() => dec(p.id)} className="rounded px-2 py-1 border border-white/15 hover:bg-white/10">–</button>
+                <button onClick={() => dec(product.id)} className="rounded-md border border-white/20 px-2 py-1 hover:bg-white/5">-</button>
                 <span className="w-8 text-center">{qty}</span>
-                <button onClick={() => inc(p.id)} className="rounded px-2 py-1 border border-white/15 hover:bg-white/10">+</button>
+                <button onClick={() => inc(product.id)} className="rounded-md border border-white/20 px-2 py-1 hover:bg-white/5">+</button>
               </div>
 
-              <div className="text-right">${(p.price * qty).toLocaleString("es-CL")}</div>
-
-              <button onClick={() => remove(p.id)} className="text-sm text-rose-400 hover:underline">Eliminar</button>
-            </li>
+              <div className="text-right min-w-[110px]">
+                <p className="font-semibold">
+                  ${(product.price * qty).toLocaleString("es-CL")}
+                </p>
+                <button onClick={() => remove(product.id)} className="text-xs opacity-70 hover:opacity-100">
+                  Quitar
+                </button>
+              </div>
+            </div>
           ))}
-        </ul>
-
-        <div className="mt-4 flex items-center justify-between">
-          <button onClick={clear} className="text-sm text-white/70 hover:underline">
-            Vaciar carrito
-          </button>
-          <div className="text-lg font-medium">
-            Subtotal: ${subtotal().toLocaleString("es-CL")}
-          </div>
         </div>
 
-        <div className="mt-4 text-right">
-          <Link href="/checkout" className="inline-flex rounded-lg bg-brand-600 px-4 py-2 text-white hover:bg-brand-500">
-            Continuar al pago
-          </Link>
+        <div className="mt-6 flex items-center justify-between">
+          <button onClick={clear} className="text-sm opacity-80 hover:opacity-100">
+            Vaciar carrito
+          </button>
+
+          <div className="text-right">
+            <p className="text-sm opacity-70">Unidades: {count}</p>
+            <p className="text-lg font-semibold">
+              Total: ${subtotal.toLocaleString("es-CL")}
+            </p>
+          </div>
         </div>
       </section>
     </main>
