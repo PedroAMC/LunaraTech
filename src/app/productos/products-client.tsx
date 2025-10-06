@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { products as DATA, type Product } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
@@ -13,24 +13,38 @@ export default function ProductsClient() {
   const search = useSearchParams();
   const router = useRouter();
 
+  const qFromUrl = (search.get("q") ?? "").trim().toLowerCase();
   const catFromUrl = (search.get("cat") as Cat) ?? "todos";
   const sortFromUrl = (search.get("sort") as Sort) ?? "featured";
 
   const [cat, setCat] = useState<Cat>(catFromUrl);
   const [sort, setSort] = useState<Sort>(sortFromUrl);
 
-  // Mantener URL sincronizada cuando cambian los estados
+  // Sincroniza cat/sort en la URL, preservando ?q= si existe
   useEffect(() => {
-    const params = new URLSearchParams();
+    const params = new URLSearchParams(search.toString());
     if (cat !== "todos") params.set("cat", cat);
-    if (sort !== "featured") params.set("sort", sort);
-    const q = params.toString();
-    router.replace(q ? `/productos?${q}` : "/productos");
-  }, [cat, sort, router]);
+    else params.delete("cat");
 
+    if (sort !== "featured") params.set("sort", sort);
+    else params.delete("sort");
+
+    router.replace(params.size ? `/productos?${params}` : "/productos");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cat, sort]);
+
+  // Filtrado por categoría + término de búsqueda (q)
   const filtered = useMemo(() => {
     let arr: Product[] =
       cat === "todos" ? DATA : DATA.filter((p) => p.category === cat);
+
+    if (qFromUrl) {
+      arr = arr.filter(
+        (p) =>
+          p.name.toLowerCase().includes(qFromUrl) ||
+          p.category.toLowerCase().includes(qFromUrl)
+      );
+    }
 
     switch (sort) {
       case "price-asc":
@@ -43,7 +57,7 @@ export default function ProductsClient() {
         arr = [...arr].sort((a, b) => a.name.localeCompare(b.name));
         break;
       default:
-        // Destacados arriba y, a empate, con stock primero
+        // Destacados primero; a empate, con stock primero
         arr = [...arr].sort(
           (a, b) =>
             Number(Boolean(b.featured)) - Number(Boolean(a.featured)) ||
@@ -51,20 +65,19 @@ export default function ProductsClient() {
         );
     }
     return arr;
-  }, [cat, sort]);
+  }, [cat, sort, qFromUrl]);
 
   const featured = useMemo(() => DATA.filter((p) => Boolean(p.featured)), []);
 
   return (
     <div className="mx-auto max-w-6xl px-4">
-      {/* Carrusel tipo vitrina */}
+      {/* Carrusel sin título duplicado */}
       <div className="mt-4 mb-8">
-        <h2 className="mb-3 text-lg font-medium opacity-80">Destacados</h2>
         <CarouselRail items={featured} />
       </div>
 
       {/* Filtros / Orden */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap gap-2">
           {(["todos", "perifericos", "accesorios", "almacenamiento"] as Cat[]).map(
             (c) => (
@@ -88,7 +101,7 @@ export default function ProductsClient() {
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as Sort)}
-            className="bg-black/40 border border-white/15 rounded px-2 py-1"
+            className="rounded border border-white/15 bg-black/40 px-2 py-1"
           >
             <option value="featured">Destacados</option>
             <option value="price-asc">Precio (menor a mayor)</option>
@@ -99,7 +112,7 @@ export default function ProductsClient() {
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pb-4">
+      <div className="grid grid-cols-1 gap-4 pb-4 sm:grid-cols-2 md:grid-cols-3">
         {filtered.map((p) => (
           <ProductCard key={p.id} p={p} />
         ))}
