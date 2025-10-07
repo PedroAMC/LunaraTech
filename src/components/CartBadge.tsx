@@ -1,13 +1,19 @@
+// src/components/CartBadge.tsx
 "use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useCart } from "@/store/cart";
 
+/**
+ * Badge del carrito con hidratación segura (evita mismatch SSR/CSR).
+ * Suscribimos al array `items` para que re-renderice al cambiar cantidades.
+ */
 export default function CartBadge() {
-  // se vuelve a renderizar cuando cambia el contador
-  const count = useCart((s) => s.count());
-  // evitar “mismatch” entre SSR y cliente
+  // Suscripción reactiva al contenido del carrito
+  const count = useCart((s) => s.items.reduce((acc, it) => acc + it.qty, 0));
+
+  // Evita parpadeos/crashes durante la hidratación
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
@@ -18,12 +24,12 @@ export default function CartBadge() {
       href="/carrito"
       className="relative inline-flex items-center gap-1.5 group"
       aria-label={`Carrito (${safeCount} ${safeCount === 1 ? "item" : "items"})`}
+      title="Ver carrito"
     >
       <span className="underline decoration-transparent group-hover:decoration-current">
         Carrito
       </span>
 
-      {/* badge con número; mostramos 0 sólo para que no parpadee al montar */}
       <span
         aria-live="polite"
         aria-atomic="true"

@@ -1,78 +1,71 @@
+// src/app/carrito/page.tsx
 "use client";
 
-import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useCart } from "@/store/cart";
+import Link from "next/link";
 
 export default function CartPage() {
-  const items    = useCart((s) => s.items);
-  const inc      = useCart((s) => s.inc);
-  const dec      = useCart((s) => s.dec);
-  const remove   = useCart((s) => s.remove);
-  const clear    = useCart((s) => s.clear);
-  const count    = useCart((s) => s.count());
-  const subtotal = useCart((s) => s.subtotal());
+  const [ready, setReady] = useState(false);
 
-  if (!items || items.length === 0) {
+  // Espera un tick en el navegador para asegurar localStorage/hidratación
+  useEffect(() => setReady(true), []);
+
+  const items = useCart((s) => s.items);
+  const subtotal = useCart((s) => s.subtotal);
+
+  if (!ready) {
     return (
       <main className="mx-auto max-w-5xl p-6">
-        <section className="card p-6 md:p-8 text-center space-y-4">
-          <h1 className="text-2xl md:text-3xl font-semibold title-grad">Tu carrito</h1>
-          <p className="opacity-80">Aún no has agregado productos.</p>
-          <Link
-            href="/productos"
-            className="inline-flex items-center gap-2 rounded-lg px-4 py-2 bg-brand-600 hover:bg-brand-500 active:translate-y-[1px] shadow-md hover:shadow-soft text-white"
-          >
-            Ir a productos
-          </Link>
-        </section>
+        <p className="opacity-70">Cargando carrito…</p>
       </main>
     );
   }
 
   return (
     <main className="mx-auto max-w-5xl p-6">
-      <section className="card p-6 md:p-8">
-        <h1 className="text-2xl md:text-3xl font-semibold title-grad">Tu carrito</h1>
+      <h1 className="text-2xl font-semibold title-grad">Carrito</h1>
 
+      {items.length === 0 ? (
+        <div className="mt-6 space-y-3">
+          <p className="opacity-80">Tu carrito está vacío.</p>
+          <Link href="/productos" className="text-brand-400 underline">
+            Ir a productos
+          </Link>
+        </div>
+      ) : (
         <div className="mt-6 space-y-4">
           {items.map(({ product, qty }) => (
-            <div key={product.id} className="flex items-center justify-between gap-4 border-b border-white/10 pb-4">
+            <div key={product.id} className="flex items-center justify-between rounded-lg border px-4 py-3"
+                 style={{ borderColor: "var(--surface-border)" }}>
               <div className="min-w-0">
-                <p className="font-medium truncate">{product.name}</p>
-                <p className="opacity-70 text-sm">${product.price.toLocaleString("es-CL")}</p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button onClick={() => dec(product.id)} className="rounded-md border border-white/20 px-2 py-1 hover:bg-white/5">-</button>
-                <span className="w-8 text-center">{qty}</span>
-                <button onClick={() => inc(product.id)} className="rounded-md border border-white/20 px-2 py-1 hover:bg-white/5">+</button>
-              </div>
-
-              <div className="text-right min-w-[110px]">
-                <p className="font-semibold">
-                  ${(product.price * qty).toLocaleString("es-CL")}
+                <p className="font-medium">{product.name}</p>
+                <p className="text-sm opacity-70">
+                  {qty} × ${product.price.toLocaleString("es-CL")}
                 </p>
-                <button onClick={() => remove(product.id)} className="text-xs opacity-70 hover:opacity-100">
-                  Quitar
-                </button>
               </div>
+              <p className="shrink-0 font-semibold">
+                ${(product.price * qty).toLocaleString("es-CL")}
+              </p>
             </div>
           ))}
-        </div>
 
-        <div className="mt-6 flex items-center justify-between">
-          <button onClick={clear} className="text-sm opacity-80 hover:opacity-100">
-            Vaciar carrito
-          </button>
-
-          <div className="text-right">
-            <p className="text-sm opacity-70">Unidades: {count}</p>
+          <div className="flex items-center justify-between border-t pt-4"
+               style={{ borderColor: "var(--surface-border)" }}>
+            <p className="text-lg font-semibold">Subtotal</p>
             <p className="text-lg font-semibold">
-              Total: ${subtotal.toLocaleString("es-CL")}
+              ${subtotal().toLocaleString("es-CL")}
             </p>
           </div>
+
+          <Link
+            href="/checkout"
+            className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-white hover:bg-brand-500"
+          >
+            Ir a pagar
+          </Link>
         </div>
-      </section>
+      )}
     </main>
   );
 }
