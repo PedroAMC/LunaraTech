@@ -1,19 +1,23 @@
+// src/components/MobileMenu.tsx
 "use client";
 
 import Link from "next/link";
 import { useEffect } from "react";
+import ThemeToggle from "@/components/theme/ThemeToggle";
 
 type MenuLink = { label: string; href: string };
 type MenuSection = { label: string; links: MenuLink[] };
 
-type MobileMenuProps = {
+export type MobileMenuProps = {
+  /** opcional para aria-controls desde el botón del header */
+  id?: string;
   /** abrir/cerrar el menú */
   open: boolean;
   /** cerrar desde fuera (escape, backdrop, botón X) */
   onClose: () => void;
   /** país seleccionado (por ahora solo CL) */
   country?: "CL";
-  /** callback al cambiar país (estructura lista; luego conectamos moneda/idioma real) */
+  /** callback al cambiar país (estructura lista para el futuro) */
   onCountryChange?: (country: "CL") => void;
 };
 
@@ -21,7 +25,7 @@ const SECTIONS: MenuSection[] = [
   {
     label: "Secciones",
     links: [
-      { label: "Productos", href: "/productos" },
+      { label: "Catálogo", href: "/productos" },
       { label: "Carrito", href: "/carrito" },
       { label: "Ayuda", href: "/#ayuda" },
     ],
@@ -35,11 +39,8 @@ const SECTIONS: MenuSection[] = [
   },
 ];
 
-/**
- * Menú móvil tipo “drawer”. No usa `any` y cumple ESLint.
- * Controlado por props `open` / `onClose`.
- */
 export default function MobileMenu({
+  id,
   open,
   onClose,
   country = "CL",
@@ -55,7 +56,7 @@ export default function MobileMenu({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  // Evita scroll del body cuando está abierto
+  // Evitar scroll del body
   useEffect(() => {
     if (!open) return;
     const { overflow } = document.body.style;
@@ -65,10 +66,7 @@ export default function MobileMenu({
     };
   }, [open]);
 
-  // Handler tipado para el select de país (placeholder para el futuro)
-  function handleCountryChange(
-    e: React.ChangeEvent<HTMLSelectElement>
-  ): void {
+  function handleCountryChange(e: React.ChangeEvent<HTMLSelectElement>): void {
     const value = e.target.value as "CL";
     onCountryChange?.(value);
   }
@@ -87,14 +85,15 @@ export default function MobileMenu({
 
       {/* Drawer */}
       <aside
-        className={`fixed left-0 top-0 z-50 h-full w-[84%] max-w-sm bg-[var(--bg-0)] border-r border-white/10 transition-transform duration-300 ${
+        id={id}
+        className={`fixed left-0 top-0 z-50 h-full w-[84%] max-w-sm border-r border-white/10 bg-[var(--bg-0)] transition-transform duration-300 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
         aria-hidden={!open}
         aria-label="Menú de navegación"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 h-14 border-b border-white/10">
+        <div className="flex h-14 items-center justify-between border-b border-white/10 px-4">
           <span className="font-semibold">Menú</span>
           <button
             type="button"
@@ -107,8 +106,8 @@ export default function MobileMenu({
         </div>
 
         {/* Contenido */}
-        <div className="p-4 space-y-6 overflow-y-auto h-[calc(100%-3.5rem)]">
-          {/* País + (futuro) idioma/tema */}
+        <div className="h-[calc(100%-3.5rem)] overflow-y-auto space-y-6 p-4">
+          {/* Preferencias */}
           <div className="space-y-3">
             <div className="text-xs uppercase opacity-70">Preferencias</div>
 
@@ -120,12 +119,10 @@ export default function MobileMenu({
                 className="mt-1 w-full rounded-md border bg-transparent px-3 py-2"
                 style={{ borderColor: "var(--surface-border)" }}
               >
-                {/* Solo Chile por ahora */}
                 <option value="CL">🇨🇱 Chile</option>
               </select>
             </label>
 
-            {/* Slots para futuro: idioma y tema (estructura lista) */}
             <div className="flex gap-2">
               <button
                 type="button"
@@ -135,14 +132,17 @@ export default function MobileMenu({
               >
                 Idioma
               </button>
-              <button
-                type="button"
-                className="flex-1 rounded-md border px-3 py-2 text-sm hover:bg-white/5"
+
+              {/* Toggle de tema compacto (visual, sin prop custom) */}
+              <div
+                className="flex-1 rounded-md border px-3 py-2"
                 style={{ borderColor: "var(--surface-border)" }}
-                title="Tema claro/oscuro (ya existe toggle en navbar)"
+                title="Tema claro/oscuro"
               >
-                Tema
-              </button>
+                <div className="scale-90 origin-left">
+                  <ThemeToggle />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -166,16 +166,15 @@ export default function MobileMenu({
             </div>
           ))}
 
-          {/* Social (placeholder estético) */}
+          {/* Redes (placeholder) */}
           <div className="pt-2">
-            <div className="text-xs uppercase opacity-70 mb-2">Redes</div>
+            <div className="mb-2 text-xs uppercase opacity-70">Redes</div>
             <div className="flex gap-2">
               {["Facebook", "Instagram", "TikTok"].map((name) => (
                 <span
                   key={name}
                   className="inline-flex items-center justify-center rounded-md border px-3 py-1.5 text-xs opacity-80 hover:opacity-100"
                   style={{ borderColor: "var(--surface-border)" }}
-                  title={name}
                 >
                   {name}
                 </span>

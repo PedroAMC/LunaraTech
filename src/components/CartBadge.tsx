@@ -5,37 +5,25 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useCart } from "@/store/cart";
 
-/**
- * Badge del carrito con hidratación segura (evita mismatch SSR/CSR).
- * Suscribimos al array `items` para que re-renderice al cambiar cantidades.
- */
 export default function CartBadge() {
-  // Suscripción reactiva al contenido del carrito
-  const count = useCart((s) => s.items.reduce((acc, it) => acc + it.qty, 0));
-
-  // Evita parpadeos/crashes durante la hidratación
+  const count = useCart((s) => s.count());
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
-
-  const safeCount = mounted ? count : 0;
+  const safe = mounted ? count : 0;
 
   return (
     <Link
       href="/carrito"
-      className="relative inline-flex items-center gap-1.5 group"
-      aria-label={`Carrito (${safeCount} ${safeCount === 1 ? "item" : "items"})`}
-      title="Ver carrito"
+      className="relative inline-flex items-center justify-center rounded-full border border-white/15 p-2 hover:bg-white/5"
+      aria-label={`Carrito (${safe})`}
     >
-      <span className="underline decoration-transparent group-hover:decoration-current">
-        Carrito
-      </span>
-
+      {/* carrito simple (puedes cambiarlo luego a un SVG/imagen) */}
+      <span aria-hidden className="text-[18px] leading-none">🛒</span>
       <span
-        aria-live="polite"
-        aria-atomic="true"
-        className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-600 px-1.5 text-[11px] font-semibold leading-5 text-white group-hover:bg-brand-500"
+        aria-hidden
+        className="absolute -right-1.5 -top-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-600 px-1.5 text-[11px] font-semibold leading-5 text-white"
       >
-        {safeCount}
+        {safe}
       </span>
     </Link>
   );
