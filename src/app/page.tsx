@@ -1,11 +1,16 @@
 // src/app/page.tsx
 import Link from "next/link";
 import CategoriesBar from "@/components/CategoriesBar";
+import HeroBanner from "@/components/HeroBanner";
 
 export default function HomePage() {
   return (
-    <main className="mx-auto max-w-5xl p-6">
-      <section className="rounded-2xl border border-white/10 bg-gradient-to-br from-brand-900/40 via-brand-700/20 to-transparent p-8 md:p-12">
+    <main className="mx-auto max-w-6xl p-6">
+      {/* Héroe full-bleed arriba (1 imagen, más bajito) */}
+      <HeroBanner />
+
+      {/* Bienvenida debajo del héroe */}
+      <section className="mt-8 rounded-2xl border border-white/10 bg-gradient-to-br from-brand-900/40 via-brand-700/20 to-transparent p-8 md:p-10">
         <h1 className="text-3xl md:text-4xl font-semibold">
           Bienvenido a <span className="text-brand-400">LUNARATECH</span>
         </h1>
@@ -30,8 +35,30 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* NUEVO: categorías tipo tarjetas (6) */}
+      {/* Categorías cortas */}
       <CategoriesBar />
+
+      {/* Colecciones destacadas (placeholder). “Ver todo” NO es catálogo. */}
+      <section className="mt-10 rounded-2xl border border-white/10 bg-[var(--surface-2)] p-4 md:p-6">
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-lg font-semibold">Colecciones destacadas</h3>
+          <Link href="/colecciones" className="text-brand-400 hover:underline">
+            Ver todo
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <article
+              key={i}
+              className="card aspect-[4/3] p-3 flex flex-col justify-end"
+            >
+              <h4 className="text-sm font-medium">Colección #{i + 1}</h4>
+              <p className="text-xs opacity-70">Explora accesorios y más</p>
+            </article>
+          ))}
+        </div>
+      </section>
 
       <section className="mt-10 text-sm opacity-70">
         <p>
