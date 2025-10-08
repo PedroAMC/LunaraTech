@@ -1,96 +1,75 @@
-// src/components/theme/ThemeToggle.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 
 type Props = {
-  /** versión más compacta (sin texto), ideal para el menú lateral */
+  /** tamaño más compacto para el menú */
   compact?: boolean;
+  /** clases extra del contenedor externo */
+  className?: string;
 };
 
-export default function ThemeToggle({ compact }: Props) {
+export default function ThemeToggle({ compact, className }: Props) {
   const [mounted, setMounted] = useState(false);
-  const [isDark, setIsDark] = useState(false);
+  const [dark, setDark] = useState(false);
 
-  // al montar, leemos la clase del <html> para no parpadear
   useEffect(() => {
     setMounted(true);
-    setIsDark(document.documentElement.classList.contains("dark"));
+    const initial = document.documentElement.classList.contains("dark");
+    setDark(initial);
   }, []);
 
-  // aplica clase .dark al <html>
-  function applyTheme(nextDark: boolean) {
-    const root = document.documentElement;
-    if (nextDark) root.classList.add("dark");
-    else root.classList.remove("dark");
-    setIsDark(nextDark);
-    // opcional: persistimos
+  function toggle() {
+    const html = document.documentElement;
+    const next = !dark;
+    setDark(next);
+    html.classList.toggle("dark", next);
+    // persiste si usas localStorage
     try {
-      localStorage.setItem("lunara-theme", nextDark ? "dark" : "light");
+      localStorage.setItem("theme", next ? "dark" : "light");
     } catch {}
   }
 
-  // lee preferencia guardada / SO al cargar
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("lunara-theme");
-      if (saved === "dark") return applyTheme(true);
-      if (saved === "light") return applyTheme(false);
-    } catch {}
-    // si no hay guardado, usamos media-query
-    const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
-    applyTheme(prefersDark);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const h = compact ? "h-6" : "h-7";
+  const w = compact ? "w-11" : "w-12";
+  const knob = compact ? "h-5 w-5" : "h-6 w-6";
 
-  if (!mounted) {
-    // esqueleto para evitar salto visual
-    return (
-      <div
-        aria-hidden
-        className={`inline-flex items-center ${compact ? "h-8 w-14" : "h-9 w-[5.5rem]"} rounded-full bg-white/10`}
+  if (!mounted) return (
+    <div className={`inline-flex items-center gap-2 ${className ?? ""}`}>
+      <button
+        aria-label="Cambiar tema"
+        className={`relative ${w} ${h} rounded-full bg-white/10 border border-white/15`}
       />
-    );
-  }
+    </div>
+  );
 
   return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={isDark}
-      onClick={() => applyTheme(!isDark)}
-      className={[
-        "inline-flex items-center rounded-full border transition-colors",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-400)] focus-visible:ring-offset-2",
-        compact ? "h-8 w-14" : "h-9 w-[5.5rem]",
-      ].join(" ")}
-      style={{ borderColor: "var(--surface-border)", background: "var(--surface)" }}
-      title={isDark ? "Tema oscuro" : "Tema claro"}
-    >
-      {/* pista del switch */}
-      <span
+    <div className={`inline-flex items-center gap-2 ${className ?? ""}`}>
+      {/* Etiqueta a la izquierda (no arriba) */}
+      <span className="text-sm select-none opacity-80">{dark ? "Oscuro" : "Claro"}</span>
+
+      {/* Switch */}
+      <button
+        type="button"
+        onClick={toggle}
+        aria-pressed={dark}
+        aria-label="Cambiar tema claro/oscuro"
         className={[
-          "relative mx-1 flex-1 h-6 rounded-full transition-colors",
-          isDark ? "bg-[linear-gradient(90deg,#1e293b,#0b0f19)]" : "bg-[linear-gradient(90deg,#e5eefc,#ffffff)]",
+          "relative rounded-full border transition-colors",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400",
+          w, h,
+          dark ? "bg-white/20 border-white/20" : "bg-white/10 border-white/15"
         ].join(" ")}
       >
-        {/* “thumb” que se desliza */}
         <span
-          aria-hidden
           className={[
-            "absolute top-1/2 -translate-y-1/2 h-5 w-5 rounded-full shadow-md transition-transform",
-            "border",
-            isDark ? "translate-x-[2.1rem] bg-[#111827] border-white/20" : "translate-x-1 bg-white border-black/10",
+            "absolute top-1/2 -translate-y-1/2 rounded-full transition-all",
+            "bg-white shadow",
+            knob,
+            dark ? "right-1" : "left-1",
           ].join(" ")}
         />
-      </span>
-
-      {/* label solo en versión no compacta */}
-      {!compact && (
-        <span className="px-2 text-sm opacity-90 select-none">
-          {isDark ? "Oscuro" : "Claro"}
-        </span>
-      )}
-    </button>
+      </button>
+    </div>
   );
 }

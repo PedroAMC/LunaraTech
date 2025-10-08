@@ -56,7 +56,7 @@ export default function MobileMenu({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  // Evitar scroll del body
+  // Evitar scroll del body cuando está abierto
   useEffect(() => {
     if (!open) return;
     const { overflow } = document.body.style;
@@ -133,15 +133,13 @@ export default function MobileMenu({
                 Idioma
               </button>
 
-              {/* Toggle de tema compacto (visual, sin prop custom) */}
+              {/* Toggle de tema compacto con etiqueta al lado (no superpuesto) */}
               <div
                 className="flex-1 rounded-md border px-3 py-2"
                 style={{ borderColor: "var(--surface-border)" }}
                 title="Tema claro/oscuro"
               >
-                <div className="scale-90 origin-left">
-                  <ThemeToggle />
-                </div>
+                <ThemeToggle compact className="w-full" />
               </div>
             </div>
           </div>

@@ -17,7 +17,12 @@
   /* superficies + bordes (más contraste) */
   --surface: #ffffff;
   --surface-2: #f3f5f8;
-  --surface-border: rgba(15, 23, 42, 0.12); /* slate-900 @ 12% */
+  --surface-border: rgba(15, 23, 42, 0.14); /* un pelín más marcado */
+
+  /* footer claro */
+  --footer-bg: #f4f7fd;
+  --footer-tx: #0b1223;
+  --footer-link: #0b1223;
 
   --ease-soft: cubic-bezier(.22,.61,.36,1);
 }
@@ -38,6 +43,11 @@
   --surface: rgba(255,255,255,.06);
   --surface-2: rgba(255,255,255,.04);
   --surface-border: rgba(255,255,255,.12);
+
+  /* footer oscuro */
+  --footer-bg: rgba(255,255,255,.02);
+  --footer-tx: #e5e7eb;
+  --footer-link: #e5e7eb;
 }
 
 /* =================== Base =================== */
@@ -98,3 +108,17 @@ a, button { transition: all .18s var(--ease-soft); }
 
 /* Scrollbar horizontal (carruseles) */
 ::-webkit-scrollbar { height: 8px; }
+
+/* -------------------- Helpers de layout -------------------- */
+/* Espaciado consistente entre bloques de la home */
+section.block { margin: 2.25rem 0; }
+
+/* Footer skinnable por tema (usa className="site-footer" en el <footer>) */
+footer.site-footer {
+  background: var(--footer-bg);
+  color: var(--footer-tx);
+}
+footer.site-footer a { color: var(--footer-link); }
+
+/* Ajuste de borde suave en claro (para ticker / separadores) */
+html:not(.dark) .border-white\/10 { border-color: rgba(15,23,42,.12) !important; }

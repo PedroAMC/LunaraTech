@@ -2,15 +2,21 @@
 import Link from "next/link";
 import CategoriesBar from "@/components/CategoriesBar";
 import HeroBanner from "@/components/HeroBanner";
+import NewsTicker from "@/components/NewsTicker";
 
 export default function HomePage() {
   return (
     <main className="mx-auto max-w-6xl p-6">
+      {/* Ticker fino, ancho completo */}
+      <NewsTicker />
+
       {/* Héroe full-bleed arriba (1 imagen, más bajito) */}
-      <HeroBanner />
+      <section className="block -mx-6 md:-mx-8 lg:-mx-[calc((100vw-72rem)/2)]">
+        <HeroBanner />
+      </section>
 
       {/* Bienvenida debajo del héroe */}
-      <section className="mt-8 rounded-2xl border border-white/10 bg-gradient-to-br from-brand-900/40 via-brand-700/20 to-transparent p-8 md:p-10">
+      <section className="block rounded-2xl border border-white/10 bg-gradient-to-br from-brand-900/40 via-brand-700/20 to-transparent p-8 md:p-10">
         <h1 className="text-3xl md:text-4xl font-semibold">
           Bienvenido a <span className="text-brand-400">LUNARATECH</span>
         </h1>
@@ -36,10 +42,12 @@ export default function HomePage() {
       </section>
 
       {/* Categorías cortas */}
-      <CategoriesBar />
+      <section className="block">
+        <CategoriesBar />
+      </section>
 
       {/* Colecciones destacadas (placeholder). “Ver todo” NO es catálogo. */}
-      <section className="mt-10 rounded-2xl border border-white/10 bg-[var(--surface-2)] p-4 md:p-6">
+      <section className="block rounded-2xl border border-white/10 bg-[var(--surface-2)] p-4 md:p-6">
         <div className="mb-3 flex items-center justify-between">
           <h3 className="text-lg font-semibold">Colecciones destacadas</h3>
           <Link href="/colecciones" className="text-brand-400 hover:underline">
@@ -60,7 +68,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="mt-10 text-sm opacity-70">
+      <section className="block text-sm opacity-70">
         <p>
           ¿Buscas algo específico? Pronto agregaremos filtros por categoría y
           búsqueda en tiempo real.
