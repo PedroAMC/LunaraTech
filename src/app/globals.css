@@ -129,3 +129,10 @@ html:not(.dark) .border-white\/10 { border-color: rgba(15,23,42,.12) !important;
   margin-right: calc(50% - 50vw);
 }
 
+/* ====== Helpers ====== */
+/* Hace que un bloque se extienda de borde a borde del viewport */
+.full-bleed {
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  width: 100vw;
+}

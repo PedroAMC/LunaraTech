@@ -2,63 +2,54 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
-type Slide = {
-  title: string;
-  image?: string; // opcional: si no hay, mostramos gradiente
-};
+type Slide = { id: string; title: string; img: string; href?: string };
 
 const SLIDES: Slide[] = [
-  { title: "Kirby llega en 8K (guiño)", image: "/hero/kirby.jpg" },
-  { title: "Universo Mario — accesorios", image: "/hero/mario.jpg" },
-  { title: "Ghost: setup samurái", image: "/hero/ghost.jpg" },
+  { id: "kirby", title: "Kirby llega en 8K (guiño)", img: "/hero/kirby.jpg" },
+  { id: "mario", title: "Universo Mario · accesorios", img: "/hero/mario.jpg" },
+  { id: "ghost", title: "Ghost: setup samurái", img: "/hero/ghost.jpg" },
 ];
 
-export default function HeroBanner({ interval = 4000 }: { interval?: number }) {
-  const [idx, setIdx] = useState(0);
-  const slides = useMemo(() => SLIDES, []);
-  const s = slides[idx];
+export default function HeroBanner() {
+  const [index, setIndex] = useState(0);
 
   useEffect(() => {
-    const t = setInterval(() => setIdx((i) => (i + 1) % slides.length), interval);
+    const t = setInterval(() => setIndex((i) => (i + 1) % SLIDES.length), 5000);
     return () => clearInterval(t);
-  }, [slides.length, interval]);
+  }, []);
 
   return (
-    <section className="full-bleed mt-0">
-      <div className="mx-auto max-w-6xl px-4">
-        <div className="relative overflow-hidden rounded-2xl border border-white/10">
-          <div className="relative h-[36vh] md:h-[40vh]">
-            {s.image ? (
-              <Image
-                src={s.image}
-                alt={s.title}
-                fill
-                priority
-                className="object-cover"
-              />
-            ) : (
-              <div className="h-full w-full bg-gradient-to-br from-brand-900/40 via-brand-700/20 to-transparent" />
-            )}
+    <section className="full-bleed border-y border-white/10 bg-[var(--bg-0)]">
+      {/* contenedor full width, sin bordes redondeados */}
+      <div className="relative h-[40vh] min-h-[260px] max-h-[520px] w-screen">
+        <Image
+          key={SLIDES[index].id}
+          src={SLIDES[index].img}
+          alt={SLIDES[index].title}
+          fill
+          priority
+          className="object-cover"
+        />
 
-            {/* caption */}
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/50 to-black/0 p-4 md:p-6">
-              <h3 className="text-base md:text-lg font-medium">{s.title}</h3>
-            </div>
-          </div>
+        {/* overlay + título */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/30 to-black/20" />
+        <div className="absolute bottom-4 left-1/2 w-[min(92vw,1400px)] -translate-x-1/2 px-4">
+          <h3 className="text-lg font-semibold drop-shadow-sm">
+            {SLIDES[index].title}
+          </h3>
 
           {/* dots */}
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2">
-            {slides.map((_, i) => (
+          <div className="mt-3 flex items-center gap-2">
+            {SLIDES.map((s, i) => (
               <button
-                key={i}
+                key={s.id}
+                onClick={() => setIndex(i)}
                 aria-label={`Ir al slide ${i + 1}`}
-                onClick={() => setIdx(i)}
-                className={
-                  "h-1.5 w-6 rounded-full transition-all " +
-                  (i === idx ? "bg-white/80" : "bg-white/35 hover:bg-white/60")
-                }
+                className={`h-1.5 rounded-full transition-all ${
+                  i === index ? "w-6 bg-white/90" : "w-3 bg-white/40 hover:bg-white/60"
+                }`}
               />
             ))}
           </div>

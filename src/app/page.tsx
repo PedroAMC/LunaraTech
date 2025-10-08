@@ -1,20 +1,20 @@
 // src/app/page.tsx
 import Link from "next/link";
+import CategoriesBar from "@/components/CategoriesBar";
 import NewsTicker from "@/components/NewsTicker";
 import HeroBanner from "@/components/HeroBanner";
-import CategoriesBar from "@/components/CategoriesBar";
 
 export default function HomePage() {
   return (
-    <main className="mx-auto max-w-6xl px-4 pb-6 pt-2">
-      {/* Ticker justo bajo el header */}
+    <main className="mx-auto max-w-6xl px-4 pb-12">
+      {/* Pegado al header, sin margen superior */}
       <NewsTicker />
 
-      {/* Héroe full-bleed y más bajo */}
+      {/* Héroe full-bleed (borde a borde) */}
       <HeroBanner />
 
-      {/* Bienvenida debajo del héroe */}
-      <section className="mt-6 rounded-2xl border border-white/10 bg-gradient-to-br from-brand-900/40 via-brand-700/20 to-transparent p-8 md:p-10">
+      {/* Bienvenida (en contenedor) */}
+      <section className="mt-8 rounded-2xl border border-white/10 bg-gradient-to-br from-brand-900/40 via-brand-700/20 to-transparent p-8 md:p-10">
         <h1 className="text-3xl md:text-4xl font-semibold">
           Bienvenido a <span className="text-brand-400">LUNARATECH</span>
         </h1>
@@ -53,7 +53,10 @@ export default function HomePage() {
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {Array.from({ length: 10 }).map((_, i) => (
-            <article key={i} className="card aspect-[4/3] p-3 flex flex-col justify-end">
+            <article
+              key={i}
+              className="card flex aspect-[4/3] flex-col justify-end p-3"
+            >
               <h4 className="text-sm font-medium">Colección #{i + 1}</h4>
               <p className="text-xs opacity-70">Explora accesorios y más</p>
             </article>
