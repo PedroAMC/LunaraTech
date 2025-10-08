@@ -1,22 +1,20 @@
 // src/app/page.tsx
 import Link from "next/link";
-import CategoriesBar from "@/components/CategoriesBar";
-import HeroBanner from "@/components/HeroBanner";
 import NewsTicker from "@/components/NewsTicker";
+import HeroBanner from "@/components/HeroBanner";
+import CategoriesBar from "@/components/CategoriesBar";
 
 export default function HomePage() {
   return (
-    <main className="mx-auto max-w-6xl p-6">
-      {/* Ticker fino, ancho completo */}
+    <main className="mx-auto max-w-6xl px-4 pb-6 pt-2">
+      {/* Ticker justo bajo el header */}
       <NewsTicker />
 
-      {/* Héroe full-bleed arriba (1 imagen, más bajito) */}
-      <section className="block -mx-6 md:-mx-8 lg:-mx-[calc((100vw-72rem)/2)]">
-        <HeroBanner />
-      </section>
+      {/* Héroe full-bleed y más bajo */}
+      <HeroBanner />
 
       {/* Bienvenida debajo del héroe */}
-      <section className="block rounded-2xl border border-white/10 bg-gradient-to-br from-brand-900/40 via-brand-700/20 to-transparent p-8 md:p-10">
+      <section className="mt-6 rounded-2xl border border-white/10 bg-gradient-to-br from-brand-900/40 via-brand-700/20 to-transparent p-8 md:p-10">
         <h1 className="text-3xl md:text-4xl font-semibold">
           Bienvenido a <span className="text-brand-400">LUNARATECH</span>
         </h1>
@@ -41,13 +39,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Categorías cortas */}
-      <section className="block">
-        <CategoriesBar />
-      </section>
+      {/* Categorías */}
+      <CategoriesBar />
 
-      {/* Colecciones destacadas (placeholder). “Ver todo” NO es catálogo. */}
-      <section className="block rounded-2xl border border-white/10 bg-[var(--surface-2)] p-4 md:p-6">
+      {/* Colecciones destacadas (placeholder) */}
+      <section className="mt-10 rounded-2xl border border-white/10 bg-[var(--surface-2)] p-4 md:p-6">
         <div className="mb-3 flex items-center justify-between">
           <h3 className="text-lg font-semibold">Colecciones destacadas</h3>
           <Link href="/colecciones" className="text-brand-400 hover:underline">
@@ -57,22 +53,12 @@ export default function HomePage() {
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {Array.from({ length: 10 }).map((_, i) => (
-            <article
-              key={i}
-              className="card aspect-[4/3] p-3 flex flex-col justify-end"
-            >
+            <article key={i} className="card aspect-[4/3] p-3 flex flex-col justify-end">
               <h4 className="text-sm font-medium">Colección #{i + 1}</h4>
               <p className="text-xs opacity-70">Explora accesorios y más</p>
             </article>
           ))}
         </div>
-      </section>
-
-      <section className="block text-sm opacity-70">
-        <p>
-          ¿Buscas algo específico? Pronto agregaremos filtros por categoría y
-          búsqueda en tiempo real.
-        </p>
       </section>
     </main>
   );

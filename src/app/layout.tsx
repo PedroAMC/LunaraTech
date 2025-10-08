@@ -1,3 +1,4 @@
+// src/app/layout.tsx
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
@@ -58,16 +59,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es" suppressHydrationWarning>
       <body className="min-h-screen">
         <ThemeProvider>
-          {/* Protegemos cualquier hook de navegación que use el header */}
+          {/* Header (usa hooks de navegación) */}
           <Suspense fallback={<div className="h-14" />}>
             <Navbar />
           </Suspense>
 
-          {/* 56px header + 80px aprox. footer.
-              Suspense aquí garantiza que CUALQUIER página (incluida /404)
-              que use useSearchParams/usePathname esté dentro de un boundary */}
-          <Suspense fallback={<main className="pt-14 pb-20" />}>
-            <main className="pt-14 pb-20">{children}</main>
+          {/* Quitamos el padding-top para que el ticker/héroe queden pegados al header */}
+          <Suspense fallback={<main className="pb-20" />}>
+            <main className="pb-20">{children}</main>
           </Suspense>
 
           <Footer />

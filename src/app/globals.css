@@ -122,3 +122,10 @@ footer.site-footer a { color: var(--footer-link); }
 
 /* Ajuste de borde suave en claro (para ticker / separadores) */
 html:not(.dark) .border-white\/10 { border-color: rgba(15,23,42,.12) !important; }
+
+/* ====== util: secciones "full-bleed" (tocar bordes laterales) ====== */
+.full-bleed {
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+}
+

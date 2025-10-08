@@ -2,61 +2,67 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
 
-type Props = {
-  title?: string;
-  imgSrc?: string;
-  href?: string;
-  height?: number; // alto en px (desktop). Mobile se adapta.
+type Slide = {
+  title: string;
+  image?: string; // opcional: si no hay, mostramos gradiente
 };
 
-/**
- * Banner de héroe simple, 1 imagen, full-bleed (ocupa todo el ancho de la ventana).
- * Si no hay imagen, muestra un gradiente de respaldo.
- */
-export default function HeroBanner({
-  title = "Kirby llega en 8K (guiño)",
-  imgSrc = "/hero/placeholder.jpg",
-  href,
-  height = 360,
-}: Props) {
-  // contenedor full-bleed (truco del 100vw dentro de un wrapper centrado)
+const SLIDES: Slide[] = [
+  { title: "Kirby llega en 8K (guiño)", image: "/hero/kirby.jpg" },
+  { title: "Universo Mario — accesorios", image: "/hero/mario.jpg" },
+  { title: "Ghost: setup samurái", image: "/hero/ghost.jpg" },
+];
+
+export default function HeroBanner({ interval = 4000 }: { interval?: number }) {
+  const [idx, setIdx] = useState(0);
+  const slides = useMemo(() => SLIDES, []);
+  const s = slides[idx];
+
+  useEffect(() => {
+    const t = setInterval(() => setIdx((i) => (i + 1) % slides.length), interval);
+    return () => clearInterval(t);
+  }, [slides.length, interval]);
+
   return (
-    <section className="relative left-1/2 right-1/2 -mx-[50vw] w-screen">
-      <div
-        className="relative w-full border-y border-white/10"
-        style={{ minHeight: 220, height }}
-      >
-        {imgSrc ? (
-          <Image
-            src={imgSrc}
-            alt={title}
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover"
-          />
-        ) : (
-          <div className="absolute inset-0 from-[#0b1223] via-[#0f172a] to-transparent bg-gradient-to-br" />
-        )}
+    <section className="full-bleed mt-0">
+      <div className="mx-auto max-w-6xl px-4">
+        <div className="relative overflow-hidden rounded-2xl border border-white/10">
+          <div className="relative h-[36vh] md:h-[40vh]">
+            {s.image ? (
+              <Image
+                src={s.image}
+                alt={s.title}
+                fill
+                priority
+                className="object-cover"
+              />
+            ) : (
+              <div className="h-full w-full bg-gradient-to-br from-brand-900/40 via-brand-700/20 to-transparent" />
+            )}
 
-        {/* overlay sutil para legibilidad */}
-        <div className="absolute inset-0 bg-black/20" />
+            {/* caption */}
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/50 to-black/0 p-4 md:p-6">
+              <h3 className="text-base md:text-lg font-medium">{s.title}</h3>
+            </div>
+          </div>
 
-        {/* Título (opcional) */}
-        <div className="absolute bottom-3 left-4 right-4 max-w-6xl mx-auto">
-          <h2 className="text-lg md:text-xl font-semibold drop-shadow">
-            {title}
-          </h2>
+          {/* dots */}
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2">
+            {slides.map((_, i) => (
+              <button
+                key={i}
+                aria-label={`Ir al slide ${i + 1}`}
+                onClick={() => setIdx(i)}
+                className={
+                  "h-1.5 w-6 rounded-full transition-all " +
+                  (i === idx ? "bg-white/80" : "bg-white/35 hover:bg-white/60")
+                }
+              />
+            ))}
+          </div>
         </div>
-
-        {/* Paginación fantasma (1 solo slide) por ahora */}
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
-          <span className="h-1.5 w-4 rounded-full bg-white/60" />
-        </div>
-
-        {/* Click-through opcional */}
-        {href && <a href={href} className="absolute inset-0" aria-label={title} />}
       </div>
     </section>
   );

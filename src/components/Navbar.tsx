@@ -18,52 +18,54 @@ export default function Navbar() {
 
   return (
     <>
+      {/* header sin padding a la izquierda para pegar la marca al borde */}
       <header className="sticky top-0 z-30 border-b border-white/10 bg-black/40 backdrop-blur">
-        <nav className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4">
-          {/* Marca pegada al borde izquierdo (rectángulo full-height) */}
+        <nav className="mx-auto flex h-14 max-w-6xl items-center gap-3 pr-4">
+          {/* MARCA — pegada a la esquina izquierda, rectangular y sin radios */}
           <Link
             href="/"
-            className="h-10 sm:h-11 px-3 inline-flex items-center rounded-md bg-[var(--surface-2)] border border-white/10 text-sm font-semibold tracking-wide title-grad"
-            style={{ marginLeft: "-0.25rem" }} // visual “pegado”
+            className="h-full px-3 inline-flex items-center border border-white/10 bg-white/5 hover:bg-white/10 font-semibold tracking-wide title-grad rounded-none"
+            aria-label="Ir al inicio"
           >
             LUNARATECH
           </Link>
 
-          {/* Botón menú al lado */}
+          {/* MENÚ (a la derecha de la marca) */}
           <button
             type="button"
-            onClick={() => setMenuOpen(true)}
+            className="rounded-md border border-white/15 px-2 py-1 hover:bg-white/5"
             aria-label="Abrir menú"
             aria-controls="mobile-menu"
             aria-expanded={menuOpen}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-white/15 bg-white/5 hover:bg-white/10"
+            onClick={() => setMenuOpen(true)}
           >
-            {/* “hamburguesa” moderna */}
-            <span className="relative block h-3 w-5">
-              <span className="absolute inset-x-0 top-0 h-[2px] rounded bg-current" />
-              <span className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[2px] rounded bg-current" />
-              <span className="absolute inset-x-0 bottom-0 h-[2px] rounded bg-current" />
-            </span>
+            ☰
           </button>
 
-          {/* Buscador */}
-          <div className="flex-1">
+          {/* BUSCADOR */}
+          <div className="flex-1 px-2">
             <SearchBar />
           </div>
 
-          {/* Lado derecho */}
+          {/* ACCIONES */}
           <div className="ml-auto flex items-center gap-4 text-sm">
             <Link
               href="/productos"
-              className={pathname?.startsWith("/productos") ? "text-brand-300" : "hover:text-brand-300"}
+              className={
+                pathname?.startsWith("/productos")
+                  ? "text-brand-300"
+                  : "hover:text-brand-300"
+              }
             >
               Catálogo
             </Link>
 
-            {/* Solo bandera (CL) */}
-            <span className="hidden sm:inline text-lg leading-none" aria-label="País">🇨🇱</span>
+            {/* Sólo bandera */}
+            <span aria-label="País" className="hidden sm:inline text-lg leading-none">
+              🇨🇱
+            </span>
 
-            {/* Auth unificado */}
+            {/* Login / Register */}
             <button
               type="button"
               onClick={() => setAuthOpen(true)}
@@ -74,7 +76,6 @@ export default function Navbar() {
               <span className="hidden sm:inline">Iniciar sesión / Registrarte</span>
             </button>
 
-            {/* Carrito */}
             <CartBadge />
           </div>
         </nav>
