@@ -9,13 +9,13 @@ type Slide = {
   subtitle?: string;
   ctaText?: string;
   ctaHref?: string;
-  image?: string; // si no hay, usa gradiente
+  image?: string;
 };
 
 const SLIDES: Slide[] = [
   { title: "Universo Mario · accesorios", image: "/hero/mario.jpg" },
   { title: "Ghost: setup samurái", image: "/hero/ghost.jpg" },
-  { title: "Kirby llega en 8K (guiño)", image: "/hero/kirby.jpg" }, // extra
+  { title: "Kirby llega en 8K (guiño)", image: "/hero/kirby.jpg" },
 ];
 
 export default function HeroBanner({ interval = 5000 }: { interval?: number }) {
@@ -31,26 +31,15 @@ export default function HeroBanner({ interval = 5000 }: { interval?: number }) {
   const s = safeSlides[idx];
 
   return (
-    <section className="w-full">
-      {/* Contenedor full-bleed sin límite lateral */}
+    <section className="full-bleed">
       <div
         className="relative overflow-hidden border-b border-white/10"
-        // Altura: más alta en desktop (+50% aprox.)
-        style={{
-          height: "min(70vh, 540px)", // desktop
-        }}
+        style={{ height: "min(70vh, 540px)" }}
       >
-        {/* Imagen/gradiente de fondo */}
+        {/* Fondo */}
         <div className="absolute inset-0">
           {s.image ? (
-            <Image
-              src={s.image}
-              alt={s.title}
-              fill
-              priority
-              className="object-cover"
-              sizes="100vw"
-            />
+            <Image src={s.image} alt={s.title} fill priority className="object-cover" sizes="100vw" />
           ) : (
             <div
               className="h-full w-full"
@@ -60,18 +49,13 @@ export default function HeroBanner({ interval = 5000 }: { interval?: number }) {
               }}
             />
           )}
-          {/* oscurecer un poco para legibilidad */}
           <div className="absolute inset-0 bg-black/35" />
         </div>
 
-        {/* Contenido inferior (título, CTA, bullets) */}
+        {/* Contenido */}
         <div className="relative z-10 flex h-full items-end">
           <div className="mx-auto w-full max-w-6xl px-4 pb-6 sm:pb-8">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold drop-shadow">
-              {s.title}
-            </h2>
-
-            {/* Dots */}
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold drop-shadow">{s.title}</h2>
             <div className="mt-4 flex gap-2">
               {safeSlides.map((_, i) => (
                 <button
