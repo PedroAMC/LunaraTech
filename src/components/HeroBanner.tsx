@@ -2,56 +2,88 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-type Slide = { id: string; title: string; img: string; href?: string };
+type Slide = {
+  title: string;
+  subtitle?: string;
+  ctaText?: string;
+  ctaHref?: string;
+  image?: string; // si no hay, usa gradiente
+};
 
 const SLIDES: Slide[] = [
-  { id: "kirby", title: "Kirby llega en 8K (guiño)", img: "/hero/kirby.jpg" },
-  { id: "mario", title: "Universo Mario · accesorios", img: "/hero/mario.jpg" },
-  { id: "ghost", title: "Ghost: setup samurái", img: "/hero/ghost.jpg" },
+  { title: "Universo Mario · accesorios", image: "/hero/mario.jpg" },
+  { title: "Ghost: setup samurái", image: "/hero/ghost.jpg" },
+  { title: "Kirby llega en 8K (guiño)", image: "/hero/kirby.jpg" }, // extra
 ];
 
-export default function HeroBanner() {
-  const [index, setIndex] = useState(0);
-
+export default function HeroBanner({ interval = 5000 }: { interval?: number }) {
+  const [idx, setIdx] = useState(0);
+  const safeSlides = useMemo(() => SLIDES, []);
   useEffect(() => {
-    const t = setInterval(() => setIndex((i) => (i + 1) % SLIDES.length), 5000);
+    if (safeSlides.length <= 1) return;
+    const t = setInterval(() => setIdx((i) => (i + 1) % safeSlides.length), interval);
     return () => clearInterval(t);
-  }, []);
+  }, [safeSlides.length, interval]);
+
+  if (!safeSlides.length) return null;
+  const s = safeSlides[idx];
 
   return (
-    <section className="full-bleed border-y border-white/10 bg-[var(--bg-0)]">
-      {/* contenedor full width, sin bordes redondeados */}
-      <div className="relative h-[40vh] min-h-[260px] max-h-[520px] w-screen">
-        <Image
-          key={SLIDES[index].id}
-          src={SLIDES[index].img}
-          alt={SLIDES[index].title}
-          fill
-          priority
-          className="object-cover"
-        />
+    <section className="w-full">
+      {/* Contenedor full-bleed sin límite lateral */}
+      <div
+        className="relative overflow-hidden border-b border-white/10"
+        // Altura: más alta en desktop (+50% aprox.)
+        style={{
+          height: "min(70vh, 540px)", // desktop
+        }}
+      >
+        {/* Imagen/gradiente de fondo */}
+        <div className="absolute inset-0">
+          {s.image ? (
+            <Image
+              src={s.image}
+              alt={s.title}
+              fill
+              priority
+              className="object-cover"
+              sizes="100vw"
+            />
+          ) : (
+            <div
+              className="h-full w-full"
+              style={{
+                background:
+                  "linear-gradient(135deg, rgba(30,58,138,.6), rgba(2,6,23,.6)), radial-gradient(1200px 800px at 10% -10%, #0f172a 10%, #0b0f19 60%)",
+              }}
+            />
+          )}
+          {/* oscurecer un poco para legibilidad */}
+          <div className="absolute inset-0 bg-black/35" />
+        </div>
 
-        {/* overlay + título */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/30 to-black/20" />
-        <div className="absolute bottom-4 left-1/2 w-[min(92vw,1400px)] -translate-x-1/2 px-4">
-          <h3 className="text-lg font-semibold drop-shadow-sm">
-            {SLIDES[index].title}
-          </h3>
+        {/* Contenido inferior (título, CTA, bullets) */}
+        <div className="relative z-10 flex h-full items-end">
+          <div className="mx-auto w-full max-w-6xl px-4 pb-6 sm:pb-8">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold drop-shadow">
+              {s.title}
+            </h2>
 
-          {/* dots */}
-          <div className="mt-3 flex items-center gap-2">
-            {SLIDES.map((s, i) => (
-              <button
-                key={s.id}
-                onClick={() => setIndex(i)}
-                aria-label={`Ir al slide ${i + 1}`}
-                className={`h-1.5 rounded-full transition-all ${
-                  i === index ? "w-6 bg-white/90" : "w-3 bg-white/40 hover:bg-white/60"
-                }`}
-              />
-            ))}
+            {/* Dots */}
+            <div className="mt-4 flex gap-2">
+              {safeSlides.map((_, i) => (
+                <button
+                  key={i}
+                  aria-label={`Ir al slide ${i + 1}`}
+                  onClick={() => setIdx(i)}
+                  className={`h-1.5 rounded-full transition-all ${
+                    i === idx ? "w-8 bg-white/90" : "w-3 bg-white/50 hover:bg-white/70"
+                  }`}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>

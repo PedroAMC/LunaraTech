@@ -4,7 +4,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-
 import SearchBar from "@/components/SearchBar";
 import CartBadge from "@/components/CartBadge";
 import MobileMenu from "@/components/MobileMenu";
@@ -18,19 +17,19 @@ export default function Navbar() {
 
   return (
     <>
-      {/* header sin padding a la izquierda para pegar la marca al borde */}
       <header className="sticky top-0 z-30 border-b border-white/10 bg-black/40 backdrop-blur">
-        <nav className="mx-auto flex h-14 max-w-6xl items-center gap-3 pr-4">
-          {/* MARCA — pegada a la esquina izquierda, rectangular y sin radios */}
+        {/* Barra a todo el ancho, con padding lateral mínimo para respirar */}
+        <nav className="flex h-14 items-center gap-3 px-2 sm:px-3">
+          {/* IZQUIERDA: Marca pegada a la esquina + botón menú a su lado */}
           <Link
             href="/"
-            className="h-full px-3 inline-flex items-center border border-white/10 bg-white/5 hover:bg-white/10 font-semibold tracking-wide title-grad rounded-none"
+            className="select-none rounded-none border border-white/12 bg-white/[0.06] px-3 py-1.5 font-semibold tracking-wide title-grad hover:bg-white/[0.1]"
             aria-label="Ir al inicio"
+            style={{ marginLeft: 0 }}
           >
             LUNARATECH
           </Link>
 
-          {/* MENÚ (a la derecha de la marca) */}
           <button
             type="button"
             className="rounded-md border border-white/15 px-2 py-1 hover:bg-white/5"
@@ -42,30 +41,26 @@ export default function Navbar() {
             ☰
           </button>
 
-          {/* BUSCADOR */}
-          <div className="flex-1 px-2">
+          {/* CENTRO: Buscador (crece) */}
+          <div className="mx-2 flex-1">
             <SearchBar />
           </div>
 
-          {/* ACCIONES */}
-          <div className="ml-auto flex items-center gap-4 text-sm">
+          {/* DERECHA: Acciones */}
+          <div className="ml-auto flex items-center gap-3 sm:gap-4 text-sm pr-2 sm:pr-3">
             <Link
               href="/productos"
-              className={
-                pathname?.startsWith("/productos")
-                  ? "text-brand-300"
-                  : "hover:text-brand-300"
-              }
+              className={pathname?.startsWith("/productos") ? "text-brand-300" : "hover:text-brand-300"}
             >
               Catálogo
             </Link>
 
-            {/* Sólo bandera */}
-            <span aria-label="País" className="hidden sm:inline text-lg leading-none">
-              🇨🇱
+            {/* Solo bandera (CL) */}
+            <span className="hidden sm:inline" aria-label="País">
+              <span className="text-lg leading-none">🇨🇱</span>
             </span>
 
-            {/* Login / Register */}
+            {/* Login/Register unido */}
             <button
               type="button"
               onClick={() => setAuthOpen(true)}
@@ -76,6 +71,7 @@ export default function Navbar() {
               <span className="hidden sm:inline">Iniciar sesión / Registrarte</span>
             </button>
 
+            {/* Carrito (icono + badge) */}
             <CartBadge />
           </div>
         </nav>
