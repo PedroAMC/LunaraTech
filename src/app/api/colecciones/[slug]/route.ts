@@ -3,11 +3,14 @@
 import { NextResponse } from "next/server";
 import { getDB } from "@/lib/db";
 
-export async function GET(_req: Request, { params }: { params: { slug: string } }) {
-  const { slug } = params;
+export async function GET(
+  _req: Request,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  const { slug } = await params;
 
   try {
-    const pool = await getDB();  // ← ← ← ARREGLO AQUÍ
+    const pool = await getDB();
 
     // 1. Obtener la colección
     const [rows]: any = await pool.query(
@@ -50,7 +53,6 @@ export async function GET(_req: Request, { params }: { params: { slug: string } 
       collection,
       products,
     });
-
   } catch (error: any) {
     console.error("Error en API de colección:", error);
 
@@ -60,4 +62,3 @@ export async function GET(_req: Request, { params }: { params: { slug: string } 
     );
   }
 }
-
