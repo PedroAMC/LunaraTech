@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useCart } from "@/store/cart";
 
 export default function CartBadge() {
-  const count = useCart((s) => s.count());
+const count = useCart((s) => s.totalItems());
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const safe = mounted ? count : 0;
