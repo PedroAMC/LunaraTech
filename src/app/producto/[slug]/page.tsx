@@ -7,7 +7,7 @@ import AddToCartButton from "@/components/AddToCartButton";
 import { getImageUrl } from "@/lib/images";
 
 type PageProps = {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 };
 
 const CATEGORY_LABEL: Record<string, string> = {
@@ -17,7 +17,8 @@ const CATEGORY_LABEL: Record<string, string> = {
 };
 
 export default async function ProductoDetail({ params }: PageProps) {
-  const product = await getProductBySlug(params.slug);
+  const { slug } = await params;
+  const product = await getProductBySlug(slug);
 
   if (!product) return notFound();
 
@@ -32,10 +33,10 @@ export default async function ProductoDetail({ params }: PageProps) {
   const rawCategory = (product.category ?? "") as keyof typeof CATEGORY_LABEL;
   const categoryName = CATEGORY_LABEL[rawCategory] ?? "Producto";
 
-  // 🔹 Armamos la URL final de imagen (R2) con fallback
+  // URL final de imagen con fallback
   const imageKey =
-    product.image && product.image !== ""
-      ? product.image
+    product.imageUrl && product.imageUrl !== ""
+      ? product.imageUrl
       : "placeholders/hero-hardware.jpg";
 
   const imageSrc = getImageUrl(imageKey);
@@ -43,7 +44,6 @@ export default async function ProductoDetail({ params }: PageProps) {
   return (
     <main className="min-h-[90vh] bg-gradient-to-br from-[#05060a] via-[#070a12] to-[#0b0f19] text-white">
       <section className="mx-auto max-w-6xl px-4 py-10 md:px-8 md:py-12 space-y-6">
-        {/* Breadcrumb */}
         <div className="text-xs text-white/55 flex items-center gap-1">
           <Link href="/" className="hover:text-emerald-300 transition">
             Inicio
@@ -59,7 +59,6 @@ export default async function ProductoDetail({ params }: PageProps) {
           <span className="text-white/80">{product.name}</span>
         </div>
 
-        {/* Tarjeta principal */}
         <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-sm shadow-[0_0_40px_rgba(15,23,42,0.75)] px-5 py-6 md:px-8 md:py-8">
           <div className="flex items-start justify-between gap-4 mb-4">
             <div>
@@ -79,7 +78,6 @@ export default async function ProductoDetail({ params }: PageProps) {
           </div>
 
           <div className="mt-4 grid gap-8 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] items-start">
-            {/* Imagen */}
             <div className="w-full">
               <div className="relative w-full aspect-square rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900 via-slate-950 to-black overflow-hidden">
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.18),transparent_55%)]" />
@@ -94,9 +92,7 @@ export default async function ProductoDetail({ params }: PageProps) {
               </div>
             </div>
 
-            {/* Datos */}
             <div className="space-y-5">
-              {/* Precio */}
               <div>
                 <p className="text-xs text-white/60 mb-1">Precio</p>
                 <p className="text-3xl font-semibold">
@@ -107,7 +103,6 @@ export default async function ProductoDetail({ params }: PageProps) {
                 </p>
               </div>
 
-              {/* Stock */}
               <div className="space-y-1">
                 <p className="text-xs text-white/60">Disponibilidad</p>
                 <p
@@ -128,7 +123,6 @@ export default async function ProductoDetail({ params }: PageProps) {
                 </p>
               </div>
 
-              {/* Info extra / descripción */}
               {product.description && (
                 <div className="space-y-1">
                   <p className="text-xs text-white/60">Descripción</p>
@@ -138,7 +132,6 @@ export default async function ProductoDetail({ params }: PageProps) {
                 </div>
               )}
 
-              {/* Detalles meta */}
               <div className="flex flex-wrap gap-2 text-[11px] text-white/60">
                 <span className="rounded-full bg-white/5 border border-white/10 px-2 py-1">
                   ID: {product.id}
@@ -151,12 +144,10 @@ export default async function ProductoDetail({ params }: PageProps) {
                 </span>
               </div>
 
-              {/* Botón agregar al carrito */}
               <div className="pt-3">
                 <AddToCartButton product={product} />
               </div>
 
-              {/* Nota futura */}
               <p className="text-[11px] text-white/45 pt-1">
                 Más adelante podrás ver cuotas, métodos de envío y retiros en
                 tienda directo desde esta vista.
