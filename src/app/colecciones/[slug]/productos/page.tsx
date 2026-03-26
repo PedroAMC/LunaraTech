@@ -1,15 +1,14 @@
 // src/app/colecciones/[slug]/productos/page.tsx
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getCollectionBySlug } from "@/lib/collections";
-import { getProductsByCollectionSlug } from "@/lib/collections";
+import { getCollectionBySlug, getProductsByCollectionSlug } from "@/lib/collections";
 
-export default async function CollectionProductsPage({
-  params,
-}: {
-  params: { slug: string };
-}) {
-  const slug = params.slug;
+type Props = {
+  params: Promise<{ slug: string }>;
+};
+
+export default async function CollectionProductsPage({ params }: Props) {
+  const { slug } = await params;
 
   // 1) validar colección
   const collection = await getCollectionBySlug(slug);
@@ -23,20 +22,25 @@ export default async function CollectionProductsPage({
       <div className="max-w-7xl mx-auto px-4 py-10 space-y-8">
         {/* Breadcrumb */}
         <div className="text-xs text-white/50 flex items-center gap-1">
-          <Link href="/" className="hover:text-emerald-300">Inicio</Link>
+          <Link href="/" className="hover:text-emerald-300">
+            Inicio
+          </Link>
           <span>/</span>
-          <Link href="/colecciones" className="hover:text-emerald-300">Colecciones</Link>
+          <Link href="/colecciones" className="hover:text-emerald-300">
+            Colecciones
+          </Link>
           <span>/</span>
-          <Link href={`/colecciones/${slug}`} className="hover:text-emerald-300">
+          <Link
+            href={`/colecciones/${slug}`}
+            className="hover:text-emerald-300"
+          >
             {collection.name}
           </Link>
           <span>/</span>
           <span className="text-white/80">Productos</span>
         </div>
 
-        <h1 className="text-2xl font-bold">
-          Productos de {collection.name}
-        </h1>
+        <h1 className="text-2xl font-bold">Productos de {collection.name}</h1>
 
         {/* Productos */}
         {products.length === 0 && (
