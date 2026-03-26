@@ -3,7 +3,7 @@ import { persist } from "zustand/middleware";
 import type { Product } from "@/lib/products";
 
 export interface CartItem {
-  id: string;
+  id: number;
   name: string;
   price: number;
   slug: string;
@@ -15,9 +15,9 @@ interface CartState {
   items: CartItem[];
 
   add: (p: Product) => void;
-  remove: (id: string) => void;
+  remove: (id: number) => void;
   clear: () => void;
-  updateQuantity: (id: string, delta: number) => void;
+  updateQuantity: (id: number, delta: number) => void;
 
   subtotal: () => number;
   totalItems: () => number;
@@ -28,12 +28,10 @@ export const useCart = create<CartState>()(
     (set, get) => ({
       items: [],
 
-      // ➕ Agregar producto
       add: (p) => {
         const items = get().items;
         const exists = items.find((i) => i.id === p.id);
 
-        // Ya existe → sumamos cantidad
         if (exists) {
           return set({
             items: items.map((i) =>
@@ -42,7 +40,6 @@ export const useCart = create<CartState>()(
           });
         }
 
-        // No existe → crear uno nuevo
         return set({
           items: [
             ...items,
@@ -51,20 +48,18 @@ export const useCart = create<CartState>()(
               name: p.name,
               price: p.price,
               slug: p.slug,
-              image: p.image ?? "",
+              image: p.imageUrl ?? "",
               quantity: 1,
             },
           ],
         });
       },
 
-      // 🗑️ Eliminar producto del carrito
       remove: (id) =>
         set({
           items: get().items.filter((i) => i.id !== id),
         }),
 
-      // 🔄 Cambiar cantidad (+1 o −1)
       updateQuantity: (id, delta) => {
         const items = get().items;
 
@@ -77,23 +72,20 @@ export const useCart = create<CartState>()(
         });
       },
 
-      // ❌ Vaciar carrito completo
       clear: () => set({ items: [] }),
 
-      // 💰 Subtotal
       subtotal: () =>
         get()
           .items.map((i) => i.price * i.quantity)
           .reduce((acc, x) => acc + x, 0),
 
-      // 🔢 Cantidad de productos totales
       totalItems: () =>
         get()
           .items.map((i) => i.quantity)
           .reduce((acc, x) => acc + x, 0),
     }),
     {
-      name: "lunara-cart", // clave en localStorage
+      name: "lunara-cart",
     }
   )
 );
