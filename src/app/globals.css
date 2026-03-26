@@ -51,7 +51,8 @@
 }
 
 /* =================== Base =================== */
-html, body {
+html,
+body {
   color: var(--tx-0);
   background: var(--bg-0);
 }
@@ -73,7 +74,11 @@ html:not(.dark) body {
 }
 
 /* Transiciones de tema */
-html, body, .card, a, button {
+html,
+body,
+.card,
+a,
+button {
   transition:
     color .18s var(--ease-soft),
     background-color .18s var(--ease-soft),
@@ -82,7 +87,10 @@ html, body, .card, a, button {
 }
 
 /* Accesibilidad */
-a, button { transition: all .18s var(--ease-soft); }
+a,
+button {
+  transition: all .18s var(--ease-soft);
+}
 
 :focus-visible {
   outline: 2px solid var(--brand-400);
@@ -104,35 +112,190 @@ a, button { transition: all .18s var(--ease-soft); }
 }
 
 /* Utilidades */
-::selection { background: var(--brand-400); color: #0b0f19; }
+::selection {
+  background: var(--brand-400);
+  color: #0b0f19;
+}
 
 /* Scrollbar horizontal (carruseles) */
-::-webkit-scrollbar { height: 8px; }
+::-webkit-scrollbar {
+  height: 8px;
+}
 
 /* -------------------- Helpers de layout -------------------- */
-/* Espaciado consistente entre bloques de la home */
-section.block { margin: 2.25rem 0; }
+section.block {
+  margin: 2.25rem 0;
+}
 
-/* Footer skinnable por tema (usa className="site-footer" en el <footer>) */
+/* Footer */
 footer.site-footer {
   background: var(--footer-bg);
   color: var(--footer-tx);
 }
-footer.site-footer a { color: var(--footer-link); }
 
-/* Ajuste de borde suave en claro (para ticker / separadores) */
-html:not(.dark) .border-white\/10 { border-color: rgba(15,23,42,.12) !important; }
-
-/* ====== util: secciones "full-bleed" (tocar bordes laterales) ====== */
-.full-bleed {
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
+footer.site-footer a {
+  color: var(--footer-link);
 }
 
-/* ====== Helpers ====== */
-/* Hace que un bloque se extienda de borde a borde del viewport */
+/* 🔒 OCULTAR HEADER Y FOOTER SOLO EN /admin/login
+   (cuando el body tenga la clase que pusimos en el componente) */
+body.admin-login-shell-off header,
+body.admin-login-shell-off .site-footer {
+  display: none !important;
+}
+
+/* Ajuste borde claro */
+html:not(.dark) .border-white\/10 {
+  border-color: rgba(15, 23, 42, .12) !important;
+}
+
+/* ====== full bleed ====== */
 .full-bleed {
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
   width: 100vw;
+}
+
+/* =================== Extras Home =================== */
+@keyframes lt-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.ticker-track {
+  display: inline-block;
+  min-width: 200%;
+  animation: lt-marquee 22s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track {
+    animation: none;
+  }
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, .12) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  height: 8px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, .12);
+  border-radius: 9999px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.full-bleed {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+}
+
+/* ========================================================= */
+/* 🚀🚀🚀 ANIMACIONES PRO LUNARATECH (Carrito + Catálogo) */
+/* ========================================================= */
+
+/* Fade + Slide */
+@keyframes fadeSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-slide {
+  animation: fadeSlideIn 0.4s ease-out forwards;
+}
+
+/* Hover Glow 3D */
+.glow-hover {
+  transition: all 0.25s ease;
+}
+
+.glow-hover:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 0 20px rgba(0, 200, 255, 0.25),
+    0 0 35px rgba(0, 120, 255, 0.15);
+}
+
+/* Imagen levitando / zoom sutil */
+.float-img {
+  transition: transform 0.35s ease;
+}
+
+.float-img:hover {
+  transform: scale(1.06);
+}
+
+/* Botón micro-bounce */
+@keyframes pop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.btn-pop:active {
+  animation: pop 0.25s ease-out;
+}
+
+/* Flash de añadido al carrito */
+@keyframes flashAdd {
+  0% {
+    background-color: rgba(0, 255, 200, 0.4);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.flash-add {
+  animation: flashAdd 0.6s ease-out;
+}
+
+/* Collapse (al eliminar ítems) */
+@keyframes collapseOut {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+    height: auto;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
+    height: 0;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.collapse {
+  animation: collapseOut 0.35s forwards;
+}
+
+
+/* ✅ Quitar outline azul global SOLO para el input del buscador del header */
+.nav-search-input:focus-visible {
+  outline: none !important;
 }

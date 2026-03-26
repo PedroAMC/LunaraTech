@@ -10,20 +10,20 @@ export default function ProductCard({ p }: { p: Product }) {
   const inStock = (p.stock ?? 0) > 0;
 
   return (
-    <article className="card p-4">
+    <article className="product-card p-4 w-full sm:w-48 md:w-64 rounded-lg bg-white text-black shadow-md mb-6">
       {/* Imagen */}
-      <div className="mb-3 aspect-[4/3] w-full rounded-lg border border-white/10 bg-white/[.03] grid place-items-center text-sm text-white/40">
-        Imagen
+      <div className="image-container mb-3 w-full h-40 bg-gray-200 rounded-lg flex justify-center items-center">
+        <span>Imagen</span>
       </div>
 
       {/* Info */}
-      <h3 className="font-medium">{p.name}</h3>
-      <p className="text-sm text-white/70">${p.price.toLocaleString("es-CL")}</p>
+      <h3 className="text-lg font-medium mb-2">{p.name}</h3>
+      <p className="text-sm text-gray-600">${p.price.toLocaleString("es-CL")}</p>
 
       {inStock ? (
-        <p className="mt-1 text-xs text-emerald-400">En stock</p>
+        <p className="mt-1 text-xs text-green-500">En stock</p>
       ) : (
-        <p className="mt-1 text-xs text-rose-400">Sin stock</p>
+        <p className="mt-1 text-xs text-red-500">Sin stock</p>
       )}
 
       {/* Acciones */}
@@ -31,14 +31,14 @@ export default function ProductCard({ p }: { p: Product }) {
         <button
           disabled={!inStock}
           onClick={() => add(p)}
-          className="rounded-lg bg-brand-600 px-3 py-1.5 text-sm text-white hover:bg-brand-500 disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full bg-blue-600 text-white px-3 py-1 rounded-md disabled:opacity-50"
         >
           Agregar
         </button>
 
         <Link
           href={`/producto/${p.slug}`}
-          className="rounded-lg border border-white/15 px-3 py-1.5 text-sm hover:bg-white/10"
+          className="w-full bg-gray-300 text-black px-3 py-1 rounded-md text-center"
         >
           Ver detalle
         </Link>
