@@ -2,14 +2,11 @@
 import { NextResponse } from "next/server";
 import { getProductBySlug } from "@/lib/products";
 
-type Params = {
-  params: {
-    slug: string;
-  };
-};
-
-export async function GET(_req: Request, { params }: Params) {
-  const { slug } = params;
+export async function GET(
+  _req: Request,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  const { slug } = await params;
 
   try {
     const product = await getProductBySlug(slug);
@@ -27,6 +24,7 @@ export async function GET(_req: Request, { params }: Params) {
     });
   } catch (error) {
     console.error(`Error en /api/products/${slug}:`, error);
+
     return NextResponse.json(
       { ok: false, error: (error as Error).message },
       { status: 500 }
