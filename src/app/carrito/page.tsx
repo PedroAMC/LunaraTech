@@ -7,7 +7,7 @@ import { useCart } from "@/store/cart";
 
 export default function CartPage() {
   const { items, updateQuantity, remove, subtotal, totalItems } = useCart();
-  const [removing, setRemoving] = useState<string | null>(null);
+  const [removing, setRemoving] = useState<number | null>(null);
 
   const isEmpty = !items || items.length === 0;
 
