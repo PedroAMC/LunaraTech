@@ -2,14 +2,18 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { products as DATA, type Product } from "@/lib/products";
+import type { Product } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
 import CarouselRail from "@/components/CarouselRail";
 
 type Cat = "todos" | "perifericos" | "accesorios" | "almacenamiento";
 type Sort = "featured" | "price-asc" | "price-desc" | "name";
 
-export default function ProductsClient() {
+type Props = {
+  products: Product[];
+};
+
+export default function ProductsClient({ products }: Props) {
   const search = useSearchParams();
   const router = useRouter();
 
@@ -20,9 +24,9 @@ export default function ProductsClient() {
   const [cat, setCat] = useState<Cat>(catFromUrl);
   const [sort, setSort] = useState<Sort>(sortFromUrl);
 
-  // Sincroniza cat/sort en la URL, preservando ?q= si existe
   useEffect(() => {
     const params = new URLSearchParams(search.toString());
+
     if (cat !== "todos") params.set("cat", cat);
     else params.delete("cat");
 
@@ -33,17 +37,20 @@ export default function ProductsClient() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cat, sort]);
 
-  // Filtrado por categoría + término de búsqueda (q)
   const filtered = useMemo(() => {
     let arr: Product[] =
-      cat === "todos" ? DATA : DATA.filter((p) => p.category === cat);
+      cat === "todos"
+        ? products
+        : products.filter((p) => p.category === cat);
 
     if (qFromUrl) {
-      arr = arr.filter(
-        (p) =>
+      arr = arr.filter((p) => {
+        const categoryText = (p.category ?? "").toLowerCase();
+        return (
           p.name.toLowerCase().includes(qFromUrl) ||
-          p.category.toLowerCase().includes(qFromUrl)
-      );
+          categoryText.includes(qFromUrl)
+        );
+      });
     }
 
     switch (sort) {
@@ -57,26 +64,27 @@ export default function ProductsClient() {
         arr = [...arr].sort((a, b) => a.name.localeCompare(b.name));
         break;
       default:
-        // Destacados primero; a empate, con stock primero
         arr = [...arr].sort(
           (a, b) =>
-            Number(Boolean(b.featured)) - Number(Boolean(a.featured)) ||
+            Number(Boolean(b.isFeatured)) - Number(Boolean(a.isFeatured)) ||
             Number((b.stock ?? 0) > 0) - Number((a.stock ?? 0) > 0)
         );
     }
-    return arr;
-  }, [cat, sort, qFromUrl]);
 
-  const featured = useMemo(() => DATA.filter((p) => Boolean(p.featured)), []);
+    return arr;
+  }, [products, cat, sort, qFromUrl]);
+
+  const featured = useMemo(
+    () => products.filter((p) => Boolean(p.isFeatured)),
+    [products]
+  );
 
   return (
     <div className="mx-auto max-w-6xl px-4">
-      {/* Carrusel sin título duplicado */}
       <div className="mt-4 mb-8">
         <CarouselRail items={featured} />
       </div>
 
-      {/* Filtros / Orden */}
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap gap-2">
           {(["todos", "perifericos", "accesorios", "almacenamiento"] as Cat[]).map(
@@ -111,7 +119,6 @@ export default function ProductsClient() {
         </label>
       </div>
 
-      {/* Grid */}
       <div className="grid grid-cols-1 gap-4 pb-4 sm:grid-cols-2 md:grid-cols-3">
         {filtered.map((p) => (
           <ProductCard key={p.id} p={p} />
