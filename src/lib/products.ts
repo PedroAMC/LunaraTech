@@ -1,106 +1,295 @@
 // src/lib/products.ts
-export type Category = "perifericos" | "accesorios" | "almacenamiento";
+"use server";
+
+import { getDB } from "./db";
+
+export type Category = "perifericos" | "accesorios" | "almacenamiento" | null;
 
 export type Product = {
-  id: string;
+  id: number;
+  sku: string;
   name: string;
+  description: string | null;
+  shortDescription: string | null;
   price: number;
-  image: string;           // ruta en /public/img/... o placeholder
-  stock: number;           // 0 -> sin stock
-  slug: string;            // para /producto/[slug]
-  category: Category;      // para filtros
-  featured?: boolean;      // para el carrusel de destacados
+  stock: number;
+  isActive: boolean;
+  slug: string;
+  category: Category;
+  isFeatured: boolean;
+
+  // 👇 NUEVO — ahora sí existe
+  imageUrl: string | null;
+
+  sold: number;
+  createdAt: string;
+  updatedAt: string;
 };
 
-// util mínima para generar slugs si te olvidas de ponerlos en los datos
-const slugify = (s: string) =>
-  s.toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
+/* ===========================================================
+   MAPEO DESDE FILA CRUD → Product
+   =========================================================== */
+function mapRowToProduct(row: any): Product {
+  return {
+    id: row.id,
+    sku: row.sku,
+    name: row.name,
+    description: row.description ?? null,
+    shortDescription: row.shortDescription ?? null,
+    price: Number(row.price ?? 0),
+    stock: Number(row.stock ?? 0),
+    isActive: row.isActive === 1 || row.isActive === true,
+    slug: row.slug,
+    category: (row.category as Category) ?? null,
+    isFeatured: row.isFeatured === 1 || row.isFeatured === true,
 
-// === Datos (mapeados a 3 categorías actuales) =============================
-// - "perifericos": teclados, mouse, webcams, parlantes, etc.
-// - "accesorios": cables, cargadores/energía, hubs, holders, redes, celulares, mantención, otros
-// - "almacenamiento": pendrives, microSD, SSD/HDD externos, lectores, cajas
+    // 👇 MAPEO DESDE MySQL
+    imageUrl: row.imageUrl ?? null,
 
-const RAW: Array<
-  Omit<Product, "slug"> & { slug?: string }
-> = [
-  // ----- ACCESORIOS (Cables / Energía / Redes / Celulares / Mantención / Otros)
-  { id:"c-001", name:"Cable HDMI 1.4 (2 m)", price:4990, image:"/img/hdmi14-2m.jpg", stock:12, category:"accesorios" },
-  { id:"c-002", name:"Cable HDMI 2.0 (2 m)", price:6990, image:"/img/hdmi20-2m.jpg", stock:20, category:"accesorios" },
-  { id:"c-003", name:"Cable HDMI 2.0 (3 m)", price:7990, image:"/img/hdmi20-3m.jpg", stock:15, category:"accesorios" },
-  { id:"c-004", name:"Cable HDMI 2.0 (5 m)", price:9990, image:"/img/hdmi20-5m.jpg", stock:10, category:"accesorios" },
-  { id:"c-005", name:"Cable HDMI 2.1 8K (2 m)", price:12990, image:"/img/hdmi21-2m.jpg", stock:8, category:"accesorios", featured:true },
-  { id:"c-006", name:"DisplayPort → HDMI", price:7990, image:"/img/dp-hdmi.jpg", stock:9, category:"accesorios" },
-  { id:"c-007", name:"MiniDP → HDMI", price:7990, image:"/img/minidp-hdmi.jpg", stock:7, category:"accesorios" },
-  { id:"c-008", name:"HDMI → VGA activo", price:8990, image:"/img/hdmi-vga.jpg", stock:6, category:"accesorios" },
-  { id:"c-009", name:"VGA → HDMI activo", price:9990, image:"/img/vga-hdmi.jpg", stock:5, category:"accesorios" },
-  { id:"c-010", name:"USB-A → USB-C (1 m)", price:2990, image:"/img/usb-a-c-1m.jpg", stock:30, category:"accesorios" },
-  { id:"c-011", name:"USB-A → USB-C (2 m)", price:3990, image:"/img/usb-a-c-2m.jpg", stock:18, category:"accesorios" },
-  { id:"c-012", name:"USB-A → Micro-USB (1 m)", price:1990, image:"/img/usb-a-micro.jpg", stock:22, category:"accesorios" },
-  { id:"c-013", name:"USB-C → USB-C PD 60 W (1 m)", price:5990, image:"/img/usb-c-c-60w.jpg", stock:14, category:"accesorios" },
-  { id:"c-014", name:"USB-C → USB-C PD 100 W (1 m)", price:8990, image:"/img/usb-c-c-100w.jpg", stock:10, category:"accesorios" },
-  { id:"c-015", name:"USB-B impresora (1.5 m)", price:2990, image:"/img/usb-b.jpg", stock:25, category:"accesorios" },
-  { id:"c-016", name:"OTG USB-C ↔ USB-A (adaptador)", price:2990, image:"/img/otg-c-a.jpg", stock:19, category:"accesorios" },
-  { id:"c-017", name:"Audio 3.5 mm macho-macho (1.5 m)", price:2990, image:"/img/audio35.jpg", stock:17, category:"accesorios" },
-  { id:"c-018", name:"Extensión 3.5 mm", price:2990, image:"/img/ext-35.jpg", stock:14, category:"accesorios" },
-  { id:"c-019", name:"Splitter 3.5 mm TRRS→2×TRS", price:3990, image:"/img/splitter-35.jpg", stock:11, category:"accesorios" },
-  { id:"c-020", name:"Ethernet Cat6 (3 m)", price:3990, image:"/img/cat6-3m.jpg", stock:20, category:"accesorios" },
-  { id:"c-021", name:"Ethernet Cat6 (10 m)", price:8990, image:"/img/cat6-10m.jpg", stock:6, category:"accesorios" },
-  { id:"c-022", name:"Hub USB 3.0 4 puertos", price:9990, image:"/img/hub4.jpg", stock:10, category:"accesorios", featured:true },
-  { id:"c-023", name:"Extensor USB 3.0 (2 m)", price:4990, image:"/img/ext-usb.jpg", stock:8, category:"accesorios" },
-  { id:"c-024", name:"HDMI switch 3×1", price:10990, image:"/img/hdmi-switch.jpg", stock:5, category:"accesorios" },
-  { id:"c-025", name:"HDMI splitter 1×2", price:10990, image:"/img/hdmi-splitter.jpg", stock:5, category:"accesorios" },
+    sold: Number(row.sold ?? 0),
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
 
-  { id:"e-001", name:"Cargador pared USB 5V/2A", price:5990, image:"/img/cargador-5v2a.jpg", stock:12, category:"accesorios" },
-  { id:"e-002", name:"Cargador pared USB-C PD 20W", price:9990, image:"/img/cargador-20w.jpg", stock:10, category:"accesorios" },
-  { id:"e-003", name:"Cargador pared USB-C PD 30W", price:14990, image:"/img/cargador-30w.jpg", stock:7, category:"accesorios" },
-  { id:"e-004", name:"Cargador auto 12V (USB-A/C)", price:7990, image:"/img/auto-12v.jpg", stock:10, category:"accesorios" },
-  { id:"e-005", name:"Powerbank 10 000 mAh", price:17990, image:"/img/power-10k.jpg", stock:6, category:"accesorios" },
-  { id:"e-006", name:"Powerbank 20 000 mAh", price:27990, image:"/img/power-20k.jpg", stock:4, category:"accesorios" },
+/* ===========================================================
+   1) Obtener TODOS los productos
+   =========================================================== */
+export async function getProducts(): Promise<Product[]> {
+  const pool = await getDB();
 
-  { id:"r-001", name:"Switch 5 puertos Gigabit", price:21990, image:"/img/switch-5g.jpg", stock:5, category:"accesorios" },
-  { id:"r-002", name:"Adaptador USB WiFi", price:9990, image:"/img/usb-wifi.jpg", stock:9, category:"accesorios" },
+  const [rows] = await pool.query<any[]>(`
+    SELECT
+      id,
+      sku,
+      name,
+      description,
+      short_description AS shortDescription,
+      base_price AS price,
+      stock,
+      is_active AS isActive,
+      slug,
+      category,
+      is_featured AS isFeatured,
+      image_url AS imageUrl,   -- 👈 IMPORTANTE
+      created_at AS createdAt,
+      updated_at AS updatedAt,
+      0 AS sold
+    FROM products
+    ORDER BY id ASC
+  `);
 
-  { id:"m-001", name:"Pasta térmica 4 g", price:4990, image:"/img/pasta-termica.jpg", stock:20, category:"accesorios" },
-  { id:"m-002", name:"Kit limpieza (paños+isoprop.)", price:3990, image:"/img/kit-limpieza.jpg", stock:18, category:"accesorios" },
-  { id:"m-003", name:"Aire comprimido", price:6990, image:"/img/aire.jpg", stock:10, category:"accesorios" },
+  return rows.map(mapRowToProduct);
+}
 
-  { id:"o-001", name:"Lámpara LED escritorio", price:12990, image:"/img/lampara.jpg", stock:6, category:"accesorios" },
-  { id:"o-002", name:"Soporte de audífonos", price:7990, image:"/img/stand-headset.jpg", stock:8, category:"accesorios" },
+/* ===========================================================
+   2) Obtener producto por SLUG (tienda pública)
+   =========================================================== */
+export async function getProductBySlug(slug: string): Promise<Product | null> {
+  const pool = await getDB();
 
-  // ----- PERIFÉRICOS
-  { id:"p-001", name:"Teclado básico USB", price:9990, image:"/img/teclado-basico.jpg", stock:10, category:"perifericos" },
-  { id:"p-002", name:"Teclado mecánico RGB", price:29990, image:"/img/teclado-rgb.jpg", stock:5, category:"perifericos", featured:true },
-  { id:"p-003", name:"Mouse básico óptico", price:4990, image:"/img/mouse-basico.jpg", stock:15, category:"perifericos" },
-  { id:"p-004", name:"Mouse gamer 6400 DPI", price:13990, image:"/img/mouse-gamer.jpg", stock:0, category:"perifericos" },
-  { id:"p-005", name:"Mousepad S", price:3990, image:"/img/mousepad-s.jpg", stock:20, category:"perifericos" },
-  { id:"p-006", name:"Mousepad XL", price:9990, image:"/img/mousepad-xl.jpg", stock:7, category:"perifericos" },
-  { id:"p-007", name:"Parlantes USB compactos", price:12990, image:"/img/parlantes-usb.jpg", stock:8, category:"perifericos" },
-  { id:"p-008", name:"Audífonos 3.5 mm con mic", price:9990, image:"/img/audif-35.jpg", stock:10, category:"perifericos" },
-  { id:"p-009", name:"Micrófono USB básico", price:14990, image:"/img/mic-usb.jpg", stock:6, category:"perifericos" },
-  { id:"p-010", name:"Webcam 1080p", price:19990, image:"/img/webcam-1080.jpg", stock:5, category:"perifericos", featured:true },
+  const [rows] = await pool.query<any[]>(
+    `
+    SELECT
+      id,
+      sku,
+      name,
+      description,
+      short_description AS shortDescription,
+      base_price AS price,
+      stock,
+      is_active AS isActive,
+      slug,
+      category,
+      is_featured AS isFeatured,
+      image_url AS imageUrl,   -- 👈
+      created_at AS createdAt,
+      updated_at AS updatedAt,
+      0 AS sold
+    FROM products
+    WHERE slug = ? AND is_active = 1
+    LIMIT 1
+    `,
+    [slug]
+  );
 
-  // ----- ALMACENAMIENTO
-  { id:"a-001", name:"Pendrive USB 3.0 32 GB", price:6990, image:"/img/pendrive-32.jpg", stock:25, category:"almacenamiento" },
-  { id:"a-002", name:"Pendrive USB 3.0 64 GB", price:9990, image:"/img/pendrive-64.jpg", stock:18, category:"almacenamiento" },
-  { id:"a-003", name:"Pendrive USB 3.0 128 GB", price:15990, image:"/img/pendrive-128.jpg", stock:8, category:"almacenamiento" },
-  { id:"a-004", name:"microSD 64 GB", price:9990, image:"/img/microsd-64.jpg", stock:14, category:"almacenamiento" },
-  { id:"a-005", name:"microSD 128 GB", price:14990, image:"/img/microsd-128.jpg", stock:10, category:"almacenamiento" },
-  { id:"a-006", name:"microSD 256 GB", price:24990, image:"/img/microsd-256.jpg", stock:6, category:"almacenamiento" },
-  { id:"a-007", name:"Lector SD/microSD USB 3.0", price:5990, image:"/img/lector-sd.jpg", stock:10, category:"almacenamiento" },
-  { id:"a-008", name:'Caja externa 2.5" USB 3.0', price:12990, image:"/img/caddy-25.jpg", stock:5, category:"almacenamiento", featured:true },
-];
+  if (!rows || rows.length === 0) return null;
+  return mapRowToProduct(rows[0]);
+}
 
-// Exporta con slug garantizado
-export const products: Product[] = RAW.map(p => ({
-  ...p,
-  slug: p.slug ?? slugify(p.name),
-}));
+/* ===========================================================
+   3) Obtener producto por ID (ADMIN)
+   =========================================================== */
+export async function getProductById(id: number): Promise<Product | null> {
+  const pool = await getDB();
 
-// Helper
-export function getProductBySlug(slug: string) {
-  return products.find(p => p.slug === slug) ?? null;
+  const [rows] = await pool.query<any[]>(
+    `
+    SELECT
+      id,
+      sku,
+      name,
+      description,
+      short_description AS shortDescription,
+      base_price AS price,
+      stock,
+      is_active AS isActive,
+      slug,
+      category,
+      is_featured AS isFeatured,
+      image_url AS imageUrl,   -- 👈
+      created_at AS createdAt,
+      updated_at AS updatedAt,
+      0 AS sold
+    FROM products
+    WHERE id = ?
+    LIMIT 1
+    `,
+    [id]
+  );
+
+  if (!rows || rows.length === 0) return null;
+  return mapRowToProduct(rows[0]);
+}
+
+/* ===========================================================
+   4) Productos destacados
+   =========================================================== */
+export async function getFeaturedProducts(limit = 6): Promise<Product[]> {
+  const pool = await getDB();
+
+  const [rows] = await pool.query<any[]>(
+    `
+    SELECT
+      id,
+      sku,
+      name,
+      description,
+      short_description AS shortDescription,
+      base_price AS price,
+      stock,
+      is_active AS isActive,
+      slug,
+      category,
+      is_featured AS isFeatured,
+      image_url AS imageUrl,   -- 👈
+      created_at AS createdAt,
+      updated_at AS updatedAt,
+      0 AS sold
+    FROM products
+    WHERE is_active = 1 AND is_featured = 1
+    ORDER BY created_at DESC
+    LIMIT ?
+    `,
+    [limit]
+  );
+
+  return rows.map(mapRowToProduct);
+}
+
+/* ===========================================================
+   5) Productos por categoría
+   =========================================================== */
+export async function getProductsByCategory(
+  category: Exclude<Category, null>
+): Promise<Product[]> {
+  const pool = await getDB();
+
+  const [rows] = await pool.query<any[]>(
+    `
+    SELECT
+      id,
+      sku,
+      name,
+      description,
+      short_description AS shortDescription,
+      base_price AS price,
+      stock,
+      is_active AS isActive,
+      slug,
+      category,
+      is_featured AS isFeatured,
+      image_url AS imageUrl,   -- 👈
+      created_at AS createdAt,
+      updated_at AS updatedAt,
+      0 AS sold
+    FROM products
+    WHERE is_active = 1 AND category = ?
+    ORDER BY id ASC
+    `,
+    [category]
+  );
+
+  return rows.map(mapRowToProduct);
+}
+
+/* ===========================================================
+   6) Productos por IDs
+   =========================================================== */
+export async function getProductsByIds(ids: number[]): Promise<Product[]> {
+  if (!ids.length) return [];
+
+  const pool = await getDB();
+  const placeholders = ids.map(() => "?").join(", ");
+
+  const [rows] = await pool.query<any[]>(
+    `
+    SELECT
+      id,
+      sku,
+      name,
+      description,
+      short_description AS shortDescription,
+      base_price AS price,
+      stock,
+      is_active AS isActive,
+      slug,
+      category,
+      is_featured AS isFeatured,
+      image_url AS imageUrl,   -- 👈
+      created_at AS createdAt,
+      updated_at AS updatedAt,
+      0 AS sold
+    FROM products
+    WHERE id IN (${placeholders})
+    `,
+    ids
+  );
+
+  return rows.map(mapRowToProduct);
+}
+
+/* ===========================================================
+   7) Actualizar producto (ADMIN)
+   =========================================================== */
+export async function updateProduct(
+  id: number,
+  fields: Partial<{
+    name: string;
+    sku: string;
+    price: number;
+    stock: number;
+    description: string | null;
+    shortDescription: string | null;
+    slug: string;
+    category: Category;
+    isActive: boolean;
+    isFeatured: boolean;
+    imageUrl: string | null; // 👈 Ahora también editable
+  }>
+): Promise<boolean> {
+  const pool = await getDB();
+
+  const keys = Object.keys(fields);
+  if (keys.length === 0) return false;
+
+  const setClause = keys.map((k) => `${k} = ?`).join(", ");
+  const values = keys.map((k) => (fields as any)[k]);
+
+  const [result]: any = await pool.query(
+    `UPDATE products SET ${setClause}, updated_at = NOW() WHERE id = ?`,
+    [...values, id]
+  );
+
+  return result.affectedRows > 0;
 }

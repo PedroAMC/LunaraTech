@@ -1,0 +1,23 @@
+﻿export default function NotFound() {
+  return (
+    <main className="relative min-h-[70vh] grid place-items-center overflow-hidden">
+      {/* Fondo "estrellado" */}
+      <div className="absolute inset-0 -z-10 bg-black
+      [background-image:radial-gradient(white_1px,transparent_1px)]
+      [background-size:24px_24px] opacity-40" />
+      <section className="text-center px-6">
+        <img
+          src="/astronaut-404.png"
+          alt="Astronauta"
+          className="mx-auto mb-6 h-48 w-48 opacity-90"
+          }
+        />
+        <h1 className="text-5xl font-bold tracking-tight">404</h1>
+        <p className="mt-2 text-neutral-300">Ups… la página se fue de paseo por el espacio.</p>
+        <a href="/" className="inline-block mt-6 rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-2 hover:bg-neutral-800">
+          Volver al inicio
+        </a>
+      </section>
+    </main>
+  );
+}
