@@ -1,11 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // ✅ Permite que el build de producción continúe incluso si ESLint encuentra errores.
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-
   // ✅ Permitimos imágenes externas (R2 + Google profile pics)
   images: {
     remotePatterns: [
