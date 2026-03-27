@@ -1,9 +1,15 @@
 // src/app/productos/page.tsx
-export const dynamic = "force-dynamic";
+import { getProducts } from "@/lib/products";
+import ProductGrid from "@/components/home/ProductGrid";
+import FilterSidebar from "@/components/home/FilterSidebar";
 
 export default async function ProductsPage() {
+  // 🔥 Cargar productos REALES desde MySQL (server component)
+  const products = await getProducts();
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-[#0a0a0e] via-[#0f1116] to-[#151820] py-16 px-6">
+      {/* 🏷️ Título */}
       <div className="text-center mb-10">
         <h1 className="text-4xl font-extrabold tracking-wide text-white uppercase mb-3 drop-shadow-[0_0_8px_rgba(0,150,255,0.3)]">
           Catálogo de Productos
@@ -14,9 +20,16 @@ export default async function ProductsPage() {
         </p>
       </div>
 
-      <div className="mx-auto max-w-7xl">
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-white/80">
-          Productos temporalmente desactivados mientras se configura la base de datos.
+      {/* Layout */}
+      <div className="mx-auto max-w-7xl flex flex-col sm:flex-row gap-8">
+        {/* Filtros laterales */}
+        <div className="sm:sticky sm:top-24 sm:h-fit w-full sm:w-64">
+          <FilterSidebar />
+        </div>
+
+        {/* Grilla principal */}
+        <div className="flex-1">
+          <ProductGrid products={products} />
         </div>
       </div>
     </main>
